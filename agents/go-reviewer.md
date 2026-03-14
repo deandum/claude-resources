@@ -5,7 +5,7 @@ description: >
   style, security, performance, and concurrency issues. Read-only - does not
   modify code.
 tools: Read, Grep, Glob, Bash
-model: opus
+model: inherit
 skills:
   - go-code-review
   - go-style

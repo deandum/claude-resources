@@ -5,7 +5,7 @@ description: >
   doubles, debugging test failures, or improving test coverage. Supports both
   stdlib testing and Ginkgo/Gomega.
 tools: Read, Edit, Write, Bash, Grep, Glob
-model: opus
+model: inherit
 skills:
   - go-testing
   - go-testing-with-framework

@@ -5,7 +5,7 @@ description: >
   with Cobra, adding subcommands, flags, configuration handling, or output
   formatting.
 tools: Read, Edit, Write, Bash, Grep, Glob
-model: opus
+model: inherit
 skills:
   - go-cli
   - go-error-handling

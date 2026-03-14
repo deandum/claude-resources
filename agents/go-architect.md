@@ -5,7 +5,7 @@ description: >
   package structure, defining interfaces, planning API surfaces, or making
   architectural decisions. Use BEFORE implementation begins.
 tools: Read, Glob, Grep, Bash, Write, Edit
-model: opus
+model: inherit
 skills:
   - go-project-init
   - go-interface-design

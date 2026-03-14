@@ -5,7 +5,7 @@ description: >
   handlers, services, repositories, workers, or any core business logic. Handles
   error handling, concurrency, context propagation, and database access patterns.
 tools: Read, Edit, Write, Bash, Grep, Glob
-model: opus
+model: inherit
 skills:
   - go-error-handling
   - go-context

@@ -5,7 +5,7 @@ description: >
   adding observability (logging, metrics, tracing), configuring health checks,
   or preparing for production deployment.
 tools: Read, Edit, Write, Bash, Grep, Glob
-model: opus
+model: inherit
 skills:
   - go-docker
   - go-observability
