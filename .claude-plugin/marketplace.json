@@ -1,34 +1,51 @@
 {
-	"name": "go-claude-resources",
+	"name": "claude-resources",
 	"owner": {
 		"name": "Dean Dumitru"
 	},
 	"metadata": {
-		"description": "Claude Code agents and skills for Go development",
-		"version": "1.0.0"
+		"description": "Multi-language Claude Code agents and skills for production-grade development",
+		"version": "2.0.0"
 	},
 	"plugins": [
 		{
-			"name": "go-skills",
-			"description": "Topic-specific skills for Go development covering style, testing, error handling, concurrency, API design, CLI building, database patterns, Docker, observability, and more",
+			"name": "core-skills",
+			"description": "Language-agnostic process skills covering error handling, testing strategy, code review, API design, concurrency, observability, Docker, project structure, and code style",
 			"source": "./",
 			"strict": false,
 			"skills": [
-				"./skills/go-api-design",
-				"./skills/go-cli",
-				"./skills/go-code-review",
-				"./skills/go-concurrency",
-				"./skills/go-context",
-				"./skills/go-database",
-				"./skills/go-docker",
-				"./skills/go-error-handling",
-				"./skills/go-interface-design",
-				"./skills/go-modules",
-				"./skills/go-observability",
-				"./skills/go-project-init",
-				"./skills/go-style",
-				"./skills/go-testing",
-				"./skills/go-testing-with-framework"
+				"./skills/core/api-design",
+				"./skills/core/code-review",
+				"./skills/core/concurrency",
+				"./skills/core/docker",
+				"./skills/core/error-handling",
+				"./skills/core/observability",
+				"./skills/core/project-structure",
+				"./skills/core/style",
+				"./skills/core/testing"
+			]
+		},
+		{
+			"name": "go-skills",
+			"description": "Go-specific implementation patterns for error handling, testing, concurrency, context, database, interfaces, modules, CLI, API design, observability, Docker, and project scaffolding",
+			"source": "./",
+			"strict": false,
+			"skills": [
+				"./skills/go/api-design",
+				"./skills/go/cli",
+				"./skills/go/code-review",
+				"./skills/go/concurrency",
+				"./skills/go/context",
+				"./skills/go/database",
+				"./skills/go/docker",
+				"./skills/go/error-handling",
+				"./skills/go/interface-design",
+				"./skills/go/modules",
+				"./skills/go/observability",
+				"./skills/go/project-init",
+				"./skills/go/style",
+				"./skills/go/testing",
+				"./skills/go/testing-with-framework"
 			]
 		}
 	]
