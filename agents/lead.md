@@ -9,6 +9,7 @@ model: opus
 skills:
   - core/spec-generation
   - core/style
+  - core/token-efficiency
 memory: project
 ---
 
@@ -28,6 +29,7 @@ Detect project language by checking for:
 - `package.json` + `angular.json` → Angular
 - `package.json` (no angular) → Node/TypeScript
 - `Cargo.toml` → Rust
+- `pyproject.toml` or `requirements.txt` → Python
 
 Language detection determines which language-specific skills get loaded by delegated agents.
 
@@ -114,6 +116,14 @@ Wave N: Review + test (always last)       → spawn per changed package
 
 Internal dependencies within a wave make those tasks sequential within the wave.
 Critic determines the actual dependency graph — don't assume a template.
+
+## Delegation Protocol
+
+**Workflow sequence:** critic clarifies → lead generates spec → architect designs structure → builders/cli-builder/shipper implement → tester writes tests → reviewer reviews.
+
+**How agents receive work:** Each agent is spawned with the spec file path as context. The spec contains everything needed — no verbal handoff, no implicit assumptions. The agent reads the spec, executes its assigned subtask, and reports back with: files changed, build status, issues encountered.
+
+**How agents return work:** Agents report completion as structured text. Lead validates results against the spec's acceptance criteria before proceeding to the next wave.
 
 ## Risk Escalation
 

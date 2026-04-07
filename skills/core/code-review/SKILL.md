@@ -38,7 +38,7 @@ Systematic review across five axes. Work through each in order. Report findings 
 
 ### 1. Correctness
 - Error handling: every error checked? Proper wrapping?
-- Concurrency: races, goroutine leaks, deadlocks?
+- Concurrency: races, concurrent task leaks, deadlocks?
 - Resource management: files/connections closed? Defer for cleanup?
 - Nil/null safety: pointer dereference after error check?
 - Edge cases: empty input, zero values, max values?
@@ -63,7 +63,7 @@ Systematic review across five axes. Work through each in order. Report findings 
 
 ### 5. Performance
 - N+1 query patterns?
-- Unbounded operations (lists without limits, goroutines without bounds)?
+- Unbounded operations (lists without limits, concurrent tasks without bounds)?
 - Timeouts on external calls?
 - Unnecessary allocations in hot paths?
 

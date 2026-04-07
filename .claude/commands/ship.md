@@ -2,13 +2,24 @@
 description: Containerize and add observability for production
 ---
 
-Use the shipper agent. Audit what observability and containerization exists.
+## Language Detection
 
-Follow this order:
-1. Structured logging at service boundaries
-2. Health checks (/healthz liveness, /readyz readiness)
-3. Metrics at boundaries (RED method: rate, errors, duration)
-4. Multi-stage Dockerfile (distroless, non-root, pinned versions)
-5. Verify: build image, check size, test health endpoint
+Detect the project language from marker files:
+- `go.mod` → lang=go, plugin=go-skills
+- `package.json` + `angular.json` → lang=angular, plugin=angular-skills
+- `package.json` (no angular) → lang=node, plugin=node-skills
+- `Cargo.toml` → lang=rust, plugin=rust-skills
+- `pyproject.toml` or `requirements.txt` → lang=python, plugin=python-skills
 
-Every service needs logging, health checks, and metrics before it ships.
+## Task
+
+Spawn the shipper agent (subagent_type: `{plugin}:{lang}-shipper`) with this task: $ARGUMENTS
+
+The shipper agent has `core/docker` and `core/observability` skills loaded.
+
+Invoke the `{plugin}:{lang}-docker` skill for containerization patterns.
+Invoke the `{plugin}:{lang}-observability` skill for logging, metrics, and tracing.
+
+Audit what exists first. Then add in order:
+1. Structured logging → 2. Health checks → 3. Metrics → 4. Dockerfile
+Verify: build image, check size, test health endpoint.

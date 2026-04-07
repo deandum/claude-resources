@@ -96,10 +96,6 @@ ginkgo -r --cover      # Coverage
 - Over-nesting (>3-4 levels), FIt/FDescribe in commits, assertions in BeforeEach
 - Testing private functions, sleep for timing (use Eventually), mocking everything
 
-## Additional Resources
-
-- [matchers-reference.md](references/matchers-reference.md), [integration-testing.md](references/integration-testing.md), [advanced-topics.md](references/advanced-topics.md)
-
 ## Verification
 
 - [ ] `ginkgo -r --race` passes with no failures or data races

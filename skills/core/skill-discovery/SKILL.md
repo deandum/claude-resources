@@ -10,39 +10,32 @@ user-invocable: false
 
 Route tasks to the right agent. Follow the first matching branch.
 
+**Cross-cutting:** All agents load `core/token-efficiency` — compresses human-facing output, never specs or agent-to-agent artifacts. Use `/compact` to adjust level.
+
 ## Decision Tree
 
-```
-Task arrives
-│
-├─ Vague idea / unclear requirements?
-│  └─ critic → clarify before anything else
-│
-├─ Complex task spanning multiple concerns?
-│  └─ lead → decomposes into spec, delegates to team
-│
-├─ New project / scaffold from scratch?
-│  └─ architect → core/project-structure + lang/project-init
-│
-├─ Design change / restructure / define interfaces?
-│  └─ architect → core/api-design + lang/interface-design
-│
-├─ Implement feature / write application code?
-│  ├─ CLI command? → cli-builder → lang/cli
-│  └─ Other code  → builder → core/error-handling + lang/*
-│
-├─ Write or fix tests?
-│  └─ tester → core/testing + lang/testing
-│
-├─ Review code / PR review?
-│  └─ reviewer → core/code-review + lang/code-review
-│
-├─ Containerize / add logging / metrics / tracing?
-│  └─ shipper → core/docker + core/observability + lang/*
-│
-└─ Unsure?
-   └─ critic → will clarify and route
-```
+When a task arrives, follow the first matching branch:
+
+- **Vague idea or unclear requirements?**
+  - Has a specific problem? → **critic** → clarify before anything else
+  - Exploring or brainstorming? → **idea-refine** → then `/define`
+- **Complex task spanning multiple concerns?**
+  - **lead** → decomposes into spec, delegates to team
+- **New project or scaffold from scratch?**
+  - **architect** → `core/project-structure` + `lang/project-init`
+- **Design change, restructure, or define interfaces?**
+  - **architect** → `core/api-design` + `lang/interface-design`
+- **Implement feature or write application code?**
+  - CLI command? → **cli-builder** → `lang/cli`
+  - Other code → **builder** → `core/error-handling` + `lang/*`
+- **Write or fix tests?**
+  - **tester** → `core/testing` + `lang/testing`
+- **Review code or PR review?**
+  - **reviewer** → `core/code-review` + `lang/code-review`
+- **Containerize, add logging, metrics, or tracing?**
+  - **shipper** → `core/docker` + `core/observability` + `lang/*`
+- **Unsure?**
+  - **critic** → will clarify and route
 
 ## Agent Quick Reference
 

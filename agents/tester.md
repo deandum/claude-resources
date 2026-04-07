@@ -7,6 +7,7 @@ tools: Read, Edit, Write, Bash, Grep, Glob
 model: inherit
 skills:
   - core/testing
+  - core/token-efficiency
   # Language-specific skills loaded based on project detection
 memory: project
 ---
@@ -27,6 +28,7 @@ Detect project language by checking for:
 - `package.json` + `angular.json` → Load angular/* testing skills
 - `package.json` (no angular) → Load node/* testing skills
 - `Cargo.toml` → Load rust/* testing skills
+- `pyproject.toml` or `requirements.txt` → Load python/* testing skills
 
 ## What You Do
 
@@ -79,8 +81,17 @@ Every bug fix MUST include a regression test. No exceptions.
 
 ## Log Learnings
 
-When you discover project-specific testing quirks (custom build tags, unusual
-test framework config, integration test setup), note them for future sessions.
+When you discover something non-obvious about this project (unusual conventions,
+gotchas, surprising patterns), record it:
+
+```bash
+"${CLAUDE_PLUGIN_ROOT}/hooks/learn.sh" "description of what you learned" "category"
+```
+
+Categories: `convention` (default), `gotcha`, `pattern`, `tool`.
+
+Record learnings for things a future session would waste time rediscovering.
+Do NOT record things obvious from the code or git history.
 
 ## What You Do NOT Do
 

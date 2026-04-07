@@ -4,7 +4,7 @@
 
 ## Tech Stack
 
-<!-- Adjust for your language/framework -->
+<!-- Adjust for your language/framework. Remove or add lines as needed. -->
 - **Language:** Go 1.24+
 - **Router:** chi
 - **Database:** MySQL with sqlx
@@ -17,31 +17,55 @@
 
 ## Commands
 
+<!-- These are the actual commands Claude should run. Keep them accurate. -->
 ```bash
 # Build
 go build -o bin/myservice ./cmd/myservice
 
-# Test
+# Test (with race detection)
 go test -race -v ./...
 
 # Lint
 golangci-lint run
 
-# Dev
+# Dev (local run)
 go run ./cmd/myservice
 ```
 
 ## Agent Workflow
 
+<!-- This maps slash commands to your project's workflow.
+     Adjust if you skip certain phases or use them differently. -->
+
 Use slash commands as entry points:
 
-1. `/define` — ALWAYS FIRST. Clarifies requirements, generates structured spec.
-2. `/plan` — Architecture and design. Package layout, interfaces.
-3. `/build` — Implementation. Follows spec and established patterns.
-4. `/test` — Tests after implementation. Prove-it pattern for bugs.
-5. `/review` — Code review. Five axes, severity labels.
-6. `/ship` — Docker, logging, metrics, health checks.
-7. `/orchestrate` — Complex multi-step tasks. Decomposes into spec + waves.
+1. `/ideate` — Refine a vague idea into a clear task statement
+2. `/define` — Clarify requirements, generate structured SPEC
+3. `/plan` — Design architecture: package layout, interfaces, API surfaces
+4. `/build` — Implement code following the SPEC and existing patterns
+5. `/test` — Write tests after implementation. Prove-it pattern for bugs.
+6. `/review` — Five-axis code review: correctness, readability, architecture, security, performance
+7. `/ship` — Docker, logging, metrics, health checks
+8. `/orchestrate` — Complex multi-step tasks: decompose into SPEC + waves
+9. `/compact` — Adjust output verbosity: standard (default), compressed, or minimal
+
+## Project Conventions
+
+<!-- Add project-specific patterns that agents should follow.
+     These help agents match your codebase style from the start. -->
+
+- [e.g., All HTTP handlers live in internal/api/handlers/]
+- [e.g., Repository interfaces are defined in the service package, not the repo package]
+- [e.g., Error messages are lowercase, no punctuation]
+- [e.g., Feature flags use the internal/flags package]
+
+## Spec Files
+
+<!-- Where SPEC files are stored and naming conventions. -->
+
+- Location: `specs/` directory in project root
+- Naming: `SPEC-[task-name].md` (kebab-case)
+- Approved specs are committed to version control
 
 ## Boundaries
 

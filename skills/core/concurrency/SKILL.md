@@ -50,7 +50,7 @@ Concurrency is not parallelism.
 |---------|----------|----------|
 | Worker Pool | Fixed concurrency over a stream | Bound the worker count |
 | Fan-Out/Fan-In | Independent tasks, collect results | Each task writes to unique slot |
-| Pipeline | Sequential stages connected by queues | Close channels to signal completion |
+| Pipeline | Sequential stages connected by queues | Close/signal completion through the primitive |
 | Rate Limiter | Throttle operations (API, DB) | Token bucket or leaky bucket |
 | Once Init | Lazy init exactly once | Safe for concurrent callers |
 | Deduplication | Suppress duplicate concurrent calls | Cache stampede prevention |
@@ -60,11 +60,10 @@ Concurrency is not parallelism.
 
 When reviewing concurrent code, check:
 
-1. **Shutdown path** — Can every goroutine/thread/task be stopped? Is there a join point?
+1. **Shutdown path** — Can every concurrent task be stopped? Is there a join point?
 2. **Bounded concurrency** — Is the number of concurrent tasks limited?
-3. **Shared state** — Is every shared variable protected (lock, atomic, channel)?
-4. **Channel ownership** — Only the sender closes. Receiver never closes.
-5. **Context cancellation** — Do loops check for cancellation?
+3. **Shared state** — Is every shared variable protected (lock, atomic, message primitive)?
+4. **Context cancellation** — Do loops check for cancellation?
 6. **Error propagation** — Do errors from concurrent tasks reach the caller?
 7. **Resource lifecycle** — Are connections/files closed even on cancellation?
 
@@ -82,8 +81,8 @@ When reviewing concurrent code, check:
 | Shortcut | Reality |
 |----------|---------|
 | "It probably won't race" | Races are non-deterministic. "Probably" means "sometimes in production." |
-| "One goroutine won't hurt" | Every unbounded task is a potential leak. Always provide a shutdown path. |
-| "A channel is always better" | Channels transfer ownership. Locks protect state. Pick the right tool. |
+| "One concurrent task won't hurt" | Every unbounded task is a potential leak. Always provide a shutdown path. |
+| "Message passing is always better" | Message primitives transfer ownership. Locks protect state. Pick the right tool. |
 | "We'll add cancellation later" | Cancellation is architectural. Retrofitting is 10x harder than designing it in. |
 
 ## Red Flags
@@ -91,7 +90,7 @@ When reviewing concurrent code, check:
 - Concurrent task with no shutdown/cancellation mechanism
 - Shared mutable state without synchronization
 - Unbounded task spawning (could spawn millions)
-- Channel used as a lock (misuse of the primitive)
+- Message primitive used as a lock (wrong tool for the job)
 - No race detection in test suite
 - Error silently dropped from concurrent task
 
@@ -99,7 +98,7 @@ When reviewing concurrent code, check:
 
 - [ ] Every concurrent task has a shutdown path (cancellable and joinable)
 - [ ] Concurrency is bounded (explicit limits on worker count)
-- [ ] Shared state protected (lock, atomic, or channel ownership)
+- [ ] Shared state protected (lock, atomic, or message primitive ownership)
 - [ ] Race detection enabled in test suite
 - [ ] Errors from concurrent tasks propagated to caller
 - [ ] No fire-and-forget patterns

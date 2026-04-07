@@ -8,6 +8,7 @@ model: inherit
 skills:
   - core/project-structure
   - core/api-design
+  - core/token-efficiency
   # Language-specific skills loaded based on project detection
 memory: project
 ---
@@ -28,6 +29,7 @@ Detect project language by checking for:
 - `package.json` + `angular.json` → Load angular/* skills
 - `package.json` (no angular) → Load node/* skills
 - `Cargo.toml` → Load rust/* skills
+- `pyproject.toml` or `requirements.txt` → Load python/* skills
 
 ## What You Do
 
@@ -94,6 +96,20 @@ Evaluate architectural decisions across:
 - Validate dependency direction (no cycles, inward flow)
 - Interface contracts must be small (1-5 methods ideal)
 - Cross-cutting packages must not import entity packages
+
+## Log Learnings
+
+When you discover something non-obvious about this project (unusual conventions,
+gotchas, surprising patterns), record it:
+
+```bash
+"${CLAUDE_PLUGIN_ROOT}/hooks/learn.sh" "description of what you learned" "category"
+```
+
+Categories: `convention` (default), `gotcha`, `pattern`, `tool`.
+
+Record learnings for things a future session would waste time rediscovering.
+Do NOT record things obvious from the code or git history.
 
 ## What You Do NOT Do
 

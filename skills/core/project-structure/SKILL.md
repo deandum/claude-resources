@@ -67,9 +67,9 @@ Shared infrastructure in dedicated packages:
 
 | Type | Key Structure |
 |------|--------------|
-| Service (HTTP/gRPC) | `cmd/` + `internal/` (entity packages + cross-cutting) + `migrations/` |
-| CLI Tool | `cmd/` + `internal/` (commands + config) |
-| Library | root package API + `internal/` + `examples/` |
+| Service (HTTP/gRPC) | entry point + internal packages (entity + cross-cutting) + migrations |
+| CLI Tool | entry point + internal packages (commands + config) |
+| Library | root API surface + internal implementation + examples |
 
 ## Dependency Audit
 
@@ -94,7 +94,7 @@ Check periodically:
 - Entity packages importing concrete implementations (should use interfaces)
 - Cross-cutting packages importing entity packages (creates cycles)
 - All code in one package or in deeply nested packages (>3 levels)
-- No clear entry point (main.go buried deep)
+- No clear entry point (entry point buried deep)
 
 ## Verification
 

@@ -2,15 +2,24 @@
 description: Review code for correctness, security, and quality
 ---
 
-Use the reviewer agent. Get the diff first (git diff or git diff --staged).
-Read surrounding context — don't review lines in isolation.
+## Language Detection
 
-Walk the five axes in order:
-1. Correctness (errors, concurrency, resources, nil safety)
-2. Readability (naming, structure, comments)
-3. Architecture (boundaries, coupling, patterns)
-4. Security (input validation, injection, secrets)
-5. Performance (N+1, unbounded ops, timeouts)
+Detect the project language from marker files:
+- `go.mod` → lang=go, plugin=go-skills
+- `package.json` + `angular.json` → lang=angular, plugin=angular-skills
+- `package.json` (no angular) → lang=node, plugin=node-skills
+- `Cargo.toml` → lang=rust, plugin=rust-skills
+- `pyproject.toml` or `requirements.txt` → lang=python, plugin=python-skills
 
-Label every finding with severity: Critical, Important, Suggestion, Nit, or FYI.
-Acknowledge strengths briefly. Never approve with Critical issues.
+## Task
+
+Spawn the reviewer agent (subagent_type: `{plugin}:{lang}-reviewer`) with this task: $ARGUMENTS
+
+The reviewer agent has `core/code-review` and `core/style` skills loaded.
+
+Invoke the `{plugin}:{lang}-code-review` skill for the language-specific review checklist.
+Invoke the `{plugin}:{lang}-error-handling` skill to verify error handling patterns.
+Invoke the `{plugin}:{lang}-concurrency` skill if the code involves concurrent work.
+
+The reviewer is read-only — it reports findings but does not modify code.
+Every finding must have a severity label: Critical, Important, Suggestion, Nit, or FYI.

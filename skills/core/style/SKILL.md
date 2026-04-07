@@ -77,7 +77,7 @@ Clear is better than clever. Every line should be immediately understandable.
 - Interfaces with too many methods (1-5 ideal)
 - Deep nesting (>3 levels)
 - Naked boolean parameters — use named types or option structs
-- `any`/`object`/`interface{}` when concrete type works
+- Generic/unbounded types when concrete type works
 - Premature abstraction — "we might need this later"
 
 ## Common Rationalizations

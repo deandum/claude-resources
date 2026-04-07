@@ -117,7 +117,7 @@ Every spec MUST use this exact structure:
 - **Scope**: "Out of Scope" prevents scope creep. Be explicit.
 - **Files table**: Exact paths. Agents execute literally — ambiguity becomes errors.
 - **Subtasks**: One agent per task. Each task completable in isolation. Each has acceptance criterion.
-- **Commands**: Exact commands with flags. Not "run tests" — `go test -race -v ./...`
+- **Commands**: Exact commands with flags. Not "run tests" — give the full command with every flag spelled out.
 - **Boundaries**: Three tiers prevent ambiguity. "Ask first" is for judgment calls.
 - **Success Criteria**: Every criterion must be verifiable with a command or observable evidence. "Works correctly" is NOT a criterion. "GET /api/v1/orders returns 200 with order list" IS.
 

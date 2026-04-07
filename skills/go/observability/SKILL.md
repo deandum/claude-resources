@@ -95,7 +95,7 @@ func (h *Handler) readyz(w http.ResponseWriter, r *http.Request) {
 
 ## Additional Resources
 
-- [alerting.md](references/alerting.md), [correlation-ids.md](references/correlation-ids.md)
+- [alerting.md](../../../references/alerting.md), [correlation-ids.md](references/correlation-ids.md)
 
 ## Verification
 

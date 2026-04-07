@@ -126,6 +126,10 @@ Logs answer "what happened?" Metrics answer "how much?" Traces answer "where did
 - Sensitive data in logs (passwords, tokens, PII)
 - Averages used for latency instead of histograms/percentiles
 
+## Additional Resources
+
+- [alerting.md](../../../references/alerting.md) — golden signals, decision framework, severity levels, alert fatigue prevention
+
 ## Verification
 
 - [ ] Structured logging at service boundaries with correlation IDs

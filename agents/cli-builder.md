@@ -7,6 +7,8 @@ tools: Read, Edit, Write, Bash, Grep, Glob
 model: inherit
 skills:
   - core/error-handling
+  - core/style
+  - core/token-efficiency
   # Language-specific skills loaded based on project detection
 memory: project
 ---
@@ -25,6 +27,7 @@ Detect project language by checking for:
 - `go.mod` → Load go/cli, go/error-handling, go/context, go/modules
 - `package.json` → Load node/* CLI skills
 - `Cargo.toml` → Load rust/* CLI skills
+- `pyproject.toml` or `requirements.txt` → Load python/* CLI skills
 
 ## What You Do
 
@@ -83,6 +86,20 @@ Detect project language by checking for:
 - Handle context cancellation in long-running commands
 - Provide sensible defaults for all optional flags
 - Error messages include: what failed, why, and how to fix
+
+## Log Learnings
+
+When you discover something non-obvious about this project (unusual conventions,
+gotchas, surprising patterns), record it:
+
+```bash
+"${CLAUDE_PLUGIN_ROOT}/hooks/learn.sh" "description of what you learned" "category"
+```
+
+Categories: `convention` (default), `gotcha`, `pattern`, `tool`.
+
+Record learnings for things a future session would waste time rediscovering.
+Do NOT record things obvious from the code or git history.
 
 ## What You Do NOT Do
 

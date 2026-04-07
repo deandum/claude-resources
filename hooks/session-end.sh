@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Captures operational learnings from the session.
-# Agents write learnings to $CLAUDE_LEARNINGS_BUFFER during the session.
+# Agents write learnings via hooks/learn.sh to /tmp buffer files during the session.
 # This hook persists them to project-specific JSONL on session end.
 
 LEARNINGS_DIR="${HOME}/.claude-resources/learnings"
@@ -13,8 +13,7 @@ PROJECT_SLUG=$(basename "$(git rev-parse --show-toplevel 2>/dev/null || pwd)")
 LEARNINGS_FILE="${LEARNINGS_DIR}/${PROJECT_SLUG}.jsonl"
 
 # Find and persist any learning buffers from this session
-BUFFER_PATTERN="/tmp/claude-learnings-${PROJECT_SLUG}-*"
-for buf in $BUFFER_PATTERN; do
+for buf in "/tmp/claude-learnings-${PROJECT_SLUG}-"*; do
   [ -f "$buf" ] || continue
   cat "$buf" >> "$LEARNINGS_FILE"
   rm -f "$buf"

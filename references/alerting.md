@@ -21,17 +21,13 @@ Focus on user-facing symptoms:
 
 ## Decision Framework: Should This Be an Alert?
 
-```
-Can you take action on this?
-├─ NO → Don't alert (use dashboard or log instead)
-└─ YES
-    └─ Does it impact users directly?
-        ├─ NO → Reduce severity (warning, not critical)
-        └─ YES
-            └─ Is it happening NOW?
-                ├─ NO → Use metrics/trends, not alerts
-                └─ YES → Create actionable alert
-```
+- **Can you take action on this?**
+  - **No** → Don't alert (use a dashboard or log instead)
+  - **Yes** → Does it impact users directly?
+    - **No** → Reduce severity (warning, not critical)
+    - **Yes** → Is it happening now?
+      - **No** → Use metrics and trends, not alerts
+      - **Yes** → Create an actionable alert
 
 ## Prometheus Alerting Rules
 

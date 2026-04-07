@@ -8,6 +8,7 @@ model: inherit
 skills:
   - core/code-review
   - core/style
+  - core/token-efficiency
   # Language-specific skills loaded based on project detection
 memory: project
 ---
@@ -28,6 +29,7 @@ Detect project language by checking for:
 - `package.json` + `angular.json` → Load angular/* review skills
 - `package.json` (no angular) → Load node/* review skills
 - `Cargo.toml` → Load rust/* review skills
+- `pyproject.toml` or `requirements.txt` → Load python/* review skills
 
 ## What You Do
 

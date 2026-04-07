@@ -75,10 +75,6 @@ Keep interfaces small -> easy to mock. Use function-based mocks (see `go/testing
 - Multi-method: descriptive noun (`UserRepository`)
 - No `Interface` suffix
 
-## Additional Resources
-
-- [anti-patterns.md](references/anti-patterns.md) — premature abstraction, wrong package, returning interfaces
-
 ## Verification
 
 - [ ] Interfaces defined at the consumer side, not the implementation package

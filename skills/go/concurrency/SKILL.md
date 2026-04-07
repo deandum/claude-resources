@@ -135,3 +135,4 @@ for _, item := range items { go process(item) }
 - [ ] `go test -race ./...` passes with no data races detected
 - [ ] `errgroup` used for goroutine coordination with error propagation
 - [ ] Channels closed by sender only, never by receiver
+- [ ] Channels not misused as locks (use `sync.Mutex` instead)
