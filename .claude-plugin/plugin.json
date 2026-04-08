@@ -7,6 +7,5 @@
   },
   "repository": "https://github.com/deandumitru/claude-resources",
   "license": "MIT",
-  "commands": "./.claude/commands",
-  "hooks": "./hooks/hooks.json"
+  "commands": "./.claude/commands"
 }
