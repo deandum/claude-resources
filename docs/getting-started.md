@@ -14,7 +14,7 @@ Onboarding guide for the claude-resources framework -- a multi-language, spec-dr
 ### As Claude Code plugin (recommended)
 
 ```bash
-claude plugin add https://github.com/deandumitru/claude-resources
+claude plugin add https://github.com/deandum/claude-resources
 ```
 
 This registers the plugin, hooks, agents, and slash commands automatically.
@@ -24,7 +24,7 @@ This registers the plugin, hooks, agents, and slash commands automatically.
 Clone the repository and reference it as a local plugin:
 
 ```bash
-git clone https://github.com/deandumitru/claude-resources.git
+git clone https://github.com/deandum/claude-resources.git
 ```
 
 Then add the path as a local plugin in your Claude Code configuration.
@@ -34,7 +34,7 @@ Then add the path as a local plugin in your Claude Code configuration.
 Add to an existing project as a submodule:
 
 ```bash
-git submodule add https://github.com/deandumitru/claude-resources.git .claude-resources
+git submodule add https://github.com/deandum/claude-resources.git .claude-resources
 ```
 
 This keeps the framework versioned alongside your project.

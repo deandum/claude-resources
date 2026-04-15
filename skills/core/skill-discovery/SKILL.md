@@ -20,6 +20,19 @@ Route tasks to the right agent. Follow the first matching branch.
 2. **Follow the first matching branch.** Branches are ordered roughly by specificity. When a task matches multiple branches, choose the **most specific** one (e.g., "write tests for a new feature" → `tester`, not `builder`; "design a new HTTP API" → `architect`, not `builder`; "debug the failing test" → `debugging` + `tester`, not just `tester`).
 3. **External writes are gated.** Any task that pushes, creates PRs, publishes releases, or pushes container images requires `ops_enabled=true` in session context — the opt-in `ops-skills` plugin. If disabled, report the action as a follow-up; do not execute. See the "Push, PR, release" branch at the bottom of the tree.
 
+## Tool Awareness
+
+Before recommending an external command or a third-party integration, read the session-start JSON for what's actually available on this machine:
+
+- **`available_tools`** — comma-joined CLI tools present from a fixed probe list: `ast-grep`, `fd`, `rg`, `jq`, `yq`, `gh`, `docker`, `kubectl`. When a task could use `ast-grep` or `rg` for code exploration, prefer the one that's present. When neither is present, fall back to `Grep`/`Glob` without complaint.
+- **`missing_tools`** — the complement of `available_tools`. Use this only to explain why you're recommending a fallback ("ast-grep not installed, using Grep instead"). Do not ask the user to install anything unless they've asked for a setup plan.
+- **`mcp_servers`** — comma-joined names of MCP servers configured for this user or project. When a task matches an MCP server's domain (e.g. browser automation and `playwright` is listed), surface the MCP option in your plan alongside the framework's native approach and let the user choose.
+- **`user_skills`** — skill directory names installed at `~/.claude/skills/`, outside this framework. Observational signal only: if a task clearly overlaps with a listed user skill, mention it once as "a related option" and proceed with the framework's own approach by default.
+- **`user_agents`** — agent directory names at `~/.claude/agents/`, outside this framework. Same treatment as `user_skills`.
+- **`user_plugins`** — plugin names from the user's installed-plugins manifest (`~/.claude/plugins/installed_plugins.json`). Same treatment.
+
+Treat every field as potentially empty. A bare system with no MCP servers, no user extensions, and none of the probed CLI tools is a fully supported configuration — the framework's core flows do not depend on any of them. **Never gate framework behavior on a third-party integration being present.**
+
 ## Decision Tree
 
 When a task arrives, follow the first matching branch:

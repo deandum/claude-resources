@@ -28,10 +28,10 @@ The result: AI agents that work the way senior engineers do — clarify before b
 
 ```bash
 # As a Claude Code plugin (recommended)
-claude plugin add https://github.com/deandumitru/claude-resources
+claude plugin add https://github.com/deandum/claude-resources
 
 # Or clone locally
-git clone https://github.com/deandumitru/claude-resources.git
+git clone https://github.com/deandum/claude-resources.git
 ```
 
 ### 2. Configure your project

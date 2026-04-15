@@ -93,13 +93,67 @@ if [ -d "$SPECS_ROOT" ]; then
   ACTIVE_SPECS="$parts"
 fi
 
-# Check for recommended codebase exploration tools
-TOOLS_MISSING=()
-command -v ast-grep >/dev/null 2>&1 || TOOLS_MISSING+=("ast-grep")
+# --- Integration discovery (every probe is try/fail-silent) ---
 
-TOOLS_MSG=""
-if [ ${#TOOLS_MISSING[@]} -gt 0 ]; then
-  TOOLS_MSG="Missing recommended tools: ${TOOLS_MISSING[*]}. See README for setup."
+# Known CLI tools agents might leverage. Fixed list keeps noise low.
+KNOWN_TOOLS=(ast-grep fd rg jq yq gh docker kubectl)
+AVAILABLE_TOOLS=()
+MISSING_TOOLS=()
+for t in "${KNOWN_TOOLS[@]}"; do
+  if command -v "$t" >/dev/null 2>&1; then
+    AVAILABLE_TOOLS+=("$t")
+  else
+    MISSING_TOOLS+=("$t")
+  fi
+done
+AVAILABLE_TOOLS_STR=$(IFS=,; echo "${AVAILABLE_TOOLS[*]+"${AVAILABLE_TOOLS[*]}"}")
+MISSING_TOOLS_STR=$(IFS=,; echo "${MISSING_TOOLS[*]+"${MISSING_TOOLS[*]}"}")
+
+# MCP server names. jq preferred, sed fallback. Both paths wrapped in `|| true`.
+# Extracts only server name keys — never touches env/command/args (secret hygiene).
+_mcp_extract_names() {
+  local file="$1"
+  [ -f "$file" ] || return 0
+  if command -v jq >/dev/null 2>&1; then
+    jq -r '
+      [
+        (.mcpServers // {} | keys),
+        (.projects // {} | to_entries | map(.value.mcpServers // {} | keys) | add // [])
+      ] | add | unique | .[]
+    ' "$file" 2>/dev/null || true
+  else
+    sed -n '/"mcpServers"[[:space:]]*:[[:space:]]*{/,/^[[:space:]]*}/p' "$file" 2>/dev/null \
+      | sed -n 's/^[[:space:]]*"\([^"]*\)"[[:space:]]*:[[:space:]]*{.*/\1/p' \
+      || true
+  fi
+}
+MCP_SERVERS=$({
+  _mcp_extract_names "${HOME}/.claude.json"
+  _mcp_extract_names "${HOME}/.claude/settings.json"
+  _mcp_extract_names "$(pwd)/.mcp.json"
+} 2>/dev/null | sort -u | tr '\n' ',' | sed -e 's/,$//' -e 's/^mcpServers,//' -e 's/,mcpServers,/,/' -e 's/,mcpServers$//' -e 's/^mcpServers$//' || true)
+
+# User-scope skills and agents: dir listings under ~/.claude/
+_list_dir_names() {
+  local dir="$1"
+  [ -d "$dir" ] || return 0
+  find "$dir" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; 2>/dev/null \
+    | sort | tr '\n' ',' | sed 's/,$//'
+}
+USER_SKILLS=$(_list_dir_names "${HOME}/.claude/skills")
+USER_AGENTS=$(_list_dir_names "${HOME}/.claude/agents")
+
+# User-scope plugins: read manifest, strip @marketplace suffix from keys
+USER_PLUGINS=""
+_plugins_manifest="${HOME}/.claude/plugins/installed_plugins.json"
+if [ -f "$_plugins_manifest" ]; then
+  if command -v jq >/dev/null 2>&1; then
+    USER_PLUGINS=$(jq -r '.plugins // {} | keys | map(split("@")[0]) | unique | join(",")' \
+      "$_plugins_manifest" 2>/dev/null || true)
+  else
+    USER_PLUGINS=$(sed -n 's/^[[:space:]]*"\([^"@]*\)@[^"]*"[[:space:]]*:.*/\1/p' \
+      "$_plugins_manifest" 2>/dev/null | sort -u | tr '\n' ',' | sed 's/,$//' || true)
+  fi
 fi
 
 # JSON-escape helper (pure bash; handles \, ", and common control chars)
@@ -123,7 +177,12 @@ cat <<JSON
   "language_skills": "$(json_escape "$LANG_SKILLS")",
   "ops_enabled": $OPS_ENABLED,
   "ops_skills": "$(json_escape "$OPS_SKILLS")",
-  "tools_warning": "$(json_escape "$TOOLS_MSG")",
+  "available_tools": "$(json_escape "$AVAILABLE_TOOLS_STR")",
+  "missing_tools": "$(json_escape "$MISSING_TOOLS_STR")",
+  "mcp_servers": "$(json_escape "$MCP_SERVERS")",
+  "user_skills": "$(json_escape "$USER_SKILLS")",
+  "user_agents": "$(json_escape "$USER_AGENTS")",
+  "user_plugins": "$(json_escape "$USER_PLUGINS")",
   "recent_learnings": "$(json_escape "$RECENT_LEARNINGS")",
   "active_specs": "$(json_escape "$ACTIVE_SPECS")",
   "style": "Apply core/token-efficiency (standard) to human-facing output only. Drop filler, lead with action, fragments ok. Code/commands/paths/specs unchanged.",

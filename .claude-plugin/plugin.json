@@ -5,7 +5,7 @@
   "author": {
     "name": "Dean Dumitru"
   },
-  "repository": "https://github.com/deandumitru/claude-resources",
+  "repository": "https://github.com/deandum/claude-resources",
   "license": "MIT",
   "commands": "./.claude/commands"
 }
