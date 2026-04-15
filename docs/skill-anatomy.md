@@ -243,6 +243,11 @@ May have two types of supporting subdirectories:
 
 Supporting files are loaded on-demand. The main `SKILL.md` is always loaded first; supporting files are referenced from within it and fetched only when needed.
 
+## Further Reading
+
+- [skills-catalog.md](skills-catalog.md) — the full list of 38 skills by tier and phase, with one-line descriptions and links to each `SKILL.md`
+- [extending.md](extending.md) — step-by-step walkthrough for adding a new skill to the framework
+
 ## Naming Conventions
 
 - Skill directories: `lowercase-kebab-case` (e.g., `error-handling`, `api-design`)

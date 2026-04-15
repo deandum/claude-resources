@@ -8,6 +8,8 @@ model: inherit
 skills:
   - core/docker
   - core/observability
+  - core/git-workflow
+  - core/documentation
   - core/token-efficiency
   # Language-specific skills loaded based on project detection
 memory: project
@@ -22,14 +24,15 @@ production-ready.
 - Code blocks, technical terms: normal English.
 - Lead with action, not reasoning.
 
-## Language Detection
+## Language-Specific Skills
 
-Detect project language by checking for:
-- `go.mod` → Load go/docker, go/observability
-- `package.json` + `angular.json` → Load angular/* deployment skills
-- `package.json` (no angular) → Load node/* deployment skills
-- `Cargo.toml` → Load rust/* deployment skills
-- `pyproject.toml` or `requirements.txt` → Load python/* deployment skills
+Language identified by the session-start hook (`detected_languages` in session JSON). Load the matching deployment skills for your role:
+
+- **go** → `go/docker`, `go/observability`
+- **angular** → `angular/*` deployment skills
+- **node** → `node/*` deployment skills
+- **rust** → `rust/*` deployment skills
+- **python** → `python/*` deployment skills
 
 ## What You Do
 
@@ -70,6 +73,8 @@ Detect project language by checking for:
 
 ## Output Format
 
+Wrap the deployment summary in the `docs/agent-reporting.md` envelope. **Status** is `complete` when the image builds, the container runs as non-root, and the health endpoint responds. The deployment details below go in **Evidence**:
+
 ```
 ## Deployment: [service name]
 
@@ -94,6 +99,15 @@ Detect project language by checking for:
 - [ ] Runs as non-root
 - [ ] Health check responds
 ```
+
+## External Side Effects
+
+Shipping involves several potentially-external actions: `docker push` to a registry, `kubectl apply` or similar to a cluster, updating monitoring/alerting configs, cutting a release. These require `ops_enabled=true` in session context.
+
+- When `ops_enabled=true`: follow the relevant `ops/*` skill (`ops/registry` for registry push; `ops/git-remote` for tag push; `ops/release` for release publishing)
+- When `ops_enabled=false` (default): **local-only** — build the image, verify it, and document the intended push/deploy as a **Follow-up** in the report. Do not run `docker push`, `kubectl apply`, or any remote-write command.
+
+Your default scope is "make it production-ready", not "deploy it". Deployment is a separate opt-in.
 
 ## Process Rules
 

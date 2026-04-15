@@ -19,11 +19,17 @@
         "./skills/core/api-design",
         "./skills/core/code-review",
         "./skills/core/concurrency",
+        "./skills/core/debugging",
         "./skills/core/docker",
+        "./skills/core/documentation",
         "./skills/core/error-handling",
+        "./skills/core/git-workflow",
         "./skills/core/idea-refine",
         "./skills/core/observability",
+        "./skills/core/performance",
         "./skills/core/project-structure",
+        "./skills/core/security",
+        "./skills/core/simplification",
         "./skills/core/style",
         "./skills/core/testing",
         "./skills/core/token-efficiency"
@@ -50,6 +56,18 @@
         "./skills/go/style",
         "./skills/go/testing",
         "./skills/go/testing-with-framework"
+      ]
+    },
+    {
+      "name": "ops-skills",
+      "description": "Opt-in external-write skills: git push, PR creation, release publishing, container registry push. NOT enabled by default — install only when the project authorizes Claude to write to external services.",
+      "source": "./",
+      "strict": true,
+      "skills": [
+        "./skills/ops/git-remote",
+        "./skills/ops/pull-requests",
+        "./skills/ops/release",
+        "./skills/ops/registry"
       ]
     }
   ]

@@ -22,7 +22,7 @@ Go-specific checklist items to supplement the core review process.
 - `gofmt`/`goimports` applied
 - Initialisms all caps (`ID`, `URL`, `HTTP`)
 - Interfaces defined at consumer, not provider
-- No `init()` functions (except Cobra command registration)
+- No `init()` functions for business logic — acceptable for side-effect registration (Cobra commands, flag parsers, test fixtures, pprof handlers). Prefer explicit initialization from `main` when possible.
 - `got`/`want` in tests, not `actual`/`expected`
 
 ## Concurrency

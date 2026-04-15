@@ -33,7 +33,7 @@ Organize code by domain entity, not by technical layer.
 
 ## Entity-Focused Architecture
 
-Group code by business entity (user, order, product), not by type (controllers, models, services).
+Group code by business entity (user, order, product), not by type (controllers, models, services). Layered architecture scatters related feature code across directories — a single "user" change touches `controllers/`, `models/`, `services/`, and `repositories/`. Entity-focused keeps related code together so a feature change touches one package.
 
 Each entity package encapsulates:
 - **Domain logic**: entity types, value objects, validation rules
@@ -103,4 +103,4 @@ Check periodically:
 - [ ] Cross-cutting packages don't import entity packages
 - [ ] No "util/common/helpers" packages
 - [ ] Build, test, lint all pass
-- [ ] New developer can find feature code by entity name
+- [ ] New developer can locate all code for any entity in a single package without using git history

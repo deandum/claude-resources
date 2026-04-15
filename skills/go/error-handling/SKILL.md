@@ -73,6 +73,22 @@ func (c *Config) Validate() error {
 }
 ```
 
+`errors.Join` returns a single error that wraps all non-nil inputs. Callers can check for specific sentinels via `errors.Is` (which walks the full tree of joined errors). To enumerate all wrapped errors individually, type-assert to the `interface{ Unwrap() []error }` interface:
+
+```go
+err := cfg.Validate()
+if err != nil {
+    if joined, ok := err.(interface{ Unwrap() []error }); ok {
+        for _, e := range joined.Unwrap() {
+            logger.Error("config validation failed", "error", e)
+        }
+    }
+    return err
+}
+```
+
+Use this when the caller needs to report each failure individually (e.g., writing field-level validation errors to an HTTP response).
+
 ## Pattern 5: HTTP Error Mapping
 
 Map domain errors to HTTP responses at the boundary:

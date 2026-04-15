@@ -97,7 +97,7 @@ Triggered by the `SessionStart` hook registered in `hooks/hooks.json`. The scrip
 1. Detects project languages from marker files (`go.mod`, `package.json`, etc.)
 2. Lists available core and language skills
 3. Reads the last 10 learnings from `~/.claude-resources/learnings/{project-slug}.jsonl`
-4. Parses each JSONL line using `python3` to extract the `learning` field
+4. Parses each JSONL line using pure bash (sed extraction) to read the `learning` field — malformed lines are skipped silently
 5. Injects all context (languages, skills, learnings, style guidance) as a JSON object into the session
 
 ### During session
@@ -137,7 +137,7 @@ Record things a future session would waste time rediscovering:
 1. **Check the directory exists**: `ls ~/.claude-resources/learnings/`
 2. **Verify the project slug matches**: `basename $(git rev-parse --show-toplevel)` -- this must match between the session that wrote the learning and the session reading it
 3. **Check the JSONL file has valid JSON lines**: `cat ~/.claude-resources/learnings/{slug}.jsonl` -- each line must be valid JSON
-4. **Ensure python3 is available**: Both `learn.sh` and `session-start.sh` require `python3` for JSONL encoding and parsing. If python3 is missing, learnings cannot be recorded or injected
+4. **Confirm bash version**: Both `learn.sh` and `session-start.sh` use pure bash for JSONL encoding and parsing (bash 4+ required for associative arrays and parameter-expansion features). No python or other runtime is needed.
 
 ### Buffer files accumulating in /tmp
 
@@ -161,3 +161,5 @@ If `learn.sh` runs without error but the learning does not appear:
 - Check that the category is valid: must be one of `convention`, `gotcha`, `pattern`, `tool`
 - Verify the buffer file was created: `ls /tmp/claude-learnings-*`
 - Ensure the learning text is not empty (the script rejects empty strings)
+
+For broader troubleshooting of hook failures, language detection, or session context issues, see [troubleshooting.md](troubleshooting.md).

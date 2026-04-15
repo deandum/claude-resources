@@ -21,14 +21,15 @@ catch real bugs.
 - Code blocks, technical terms: normal English.
 - Lead with action, not reasoning.
 
-## Language Detection
+## Language-Specific Skills
 
-Detect project language by checking for:
-- `go.mod` → Load go/testing, go/testing-with-framework, go/style
-- `package.json` + `angular.json` → Load angular/* testing skills
-- `package.json` (no angular) → Load node/* testing skills
-- `Cargo.toml` → Load rust/* testing skills
-- `pyproject.toml` or `requirements.txt` → Load python/* testing skills
+Language identified by the session-start hook (`detected_languages` in session JSON). Load the matching testing skills for your role:
+
+- **go** → `go/testing`, `go/testing-with-framework`, `go/style`
+- **angular** → `angular/*` testing skills
+- **node** → `node/*` testing skills
+- **rust** → `rust/*` testing skills
+- **python** → `python/*` testing skills
 
 ## What You Do
 
@@ -70,6 +71,15 @@ Detect project language by checking for:
 3. Run full suite → no regressions
 
 Every bug fix MUST include a regression test. No exceptions.
+
+## Output Format
+
+Report using the schema in `docs/agent-reporting.md`:
+
+- **Status** — `complete` if all tests pass; `blocked` if application code is broken (flag the issue, do not modify app code)
+- **Files touched** — test files created/modified
+- **Evidence** — test command output showing pass/fail counts (e.g., `go test ./... -race`)
+- **Follow-ups** — coverage gaps or flakiness noticed but out of scope
 
 ## Process Rules
 

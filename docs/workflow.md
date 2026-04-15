@@ -8,6 +8,8 @@ The framework follows a spec-driven workflow where every non-trivial task goes t
 
 Every phase has a dedicated agent, a defined input, and a defined output. No phase proceeds without its predecessor completing.
 
+Every phase that spawns a specialist agent ends with a structured report following the schema in [agent-reporting.md](agent-reporting.md): `Status`, `Files touched`, `Evidence`, `Follow-ups`, and (when blocked) `Blockers`. When `/orchestrate` runs multi-wave work, the `lead` agent parses each report before starting the next wave.
+
 ## The Workflow
 
 1. `/ideate` (optional) — Refine a vague idea into a clear task statement
@@ -118,7 +120,7 @@ The shipper prepares code for production: Docker multi-stage builds, structured 
 | **Output** | Coordinated execution across agents following wave structure |
 | **Key decisions** | Task decomposition, agent assignment, wave ordering, completion verification |
 
-For complex tasks, `/orchestrate` coordinates the full workflow. The lead agent decomposes work, assigns specialist agents, and manages wave execution.
+For complex tasks, `/orchestrate` coordinates the full workflow. The lead agent decomposes work, assigns specialist agents, and manages wave execution. See [commands.md](commands.md#orchestrate) for the full command reference.
 
 ## The SPEC File
 

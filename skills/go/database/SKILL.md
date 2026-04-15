@@ -42,7 +42,19 @@ Tag structs: `db:"column_name"`. Method selection:
 | `ExecContext` | INSERT/UPDATE/DELETE |
 | `NamedExecContext` | Mutations with many params |
 
-Always use `*Context` variants. Handle `sql.ErrNoRows` for single-row lookups. Use `sqlx.In()` + `db.Rebind()` for IN clauses.
+Always use `*Context` variants. The non-context methods (`Exec`, `Query`, `Get`, `Select`) do not honor context cancellation or timeouts — a slow query keeps running even after the request is cancelled, holding a connection and a row-level lock. This is the most common Go database bug. Handle `sql.ErrNoRows` for single-row lookups. Use `sqlx.In()` + `db.Rebind()` for IN clauses.
+
+### Anti-pattern: non-context methods
+
+```go
+// BAD — no timeout, no cancellation
+rows, err := db.Query("SELECT * FROM users WHERE active = ?", true)
+
+// GOOD — honors ctx deadline and cancellation
+rows, err := db.QueryContext(ctx, "SELECT * FROM users WHERE active = ?", true)
+```
+
+Use a linter rule (e.g., `sqlrows` or a custom `grep` in CI) to prevent the non-context methods from being called at all.
 
 ## Transactions
 

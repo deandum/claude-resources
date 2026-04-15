@@ -32,7 +32,7 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 ENTRYPOINT ["/app"]
 ```
 
-**Build flags:** `CGO_ENABLED=0` = static binary. `-ldflags='-w -s'` = strip debug/symbols. Size: ~1.2GB -> ~10-20MB.
+**Build flags:** `CGO_ENABLED=0` = static binary. `-ldflags='-w -s'` = strip debug/symbols. Typical size reduction for a Go service: alpine+golang builder image ~700MB → distroless runtime image ~15-30MB (depends on statically-linked deps; complex services with heavy imports can reach 50MB+). The `-w -s` strip saves roughly 25% by removing DWARF debug info and the symbol table — do not strip if you want readable panics with function names.
 
 ## Build Args for Metadata
 

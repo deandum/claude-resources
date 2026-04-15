@@ -90,6 +90,7 @@ return doWork(ctx)
 - No defaults — provide sensible defaults for optional flags
 - Inconsistent flag naming across subcommands
 - No signal handling for long-running commands
+- **Mutating package-level state from `RunE`** — making commands read from globals (`var cfg Config` at package level) creates hidden coupling between subcommands and makes testing impossible. Prefer passing dependencies through a `*Config` closure built in `init()`, or use `cobra.Command`'s `SetContext`/`Context()` to thread state through the call chain.
 
 ## Additional Resources
 

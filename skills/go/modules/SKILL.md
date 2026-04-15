@@ -47,9 +47,11 @@ git config --global url."git@github.com:".insteadOf "https://github.com/"
 ## Workspace Mode (Monorepo)
 
 ```bash
-go work init ./api ./worker ./shared  # Creates go.work (don't commit)
+go work init ./api ./worker ./shared  # Creates go.work
 go work sync                          # Sync go.mod files
 ```
+
+**Never commit `go.work` or `go.work.sum`.** Add both to `.gitignore`. Workspace mode is a local development convenience for multi-module repos — it lets you edit a dependency and see the change immediately in the dependents without a `replace` directive. But CI must build each module from its own `go.mod` + `go.sum`, not through `go.work`, otherwise the build becomes non-reproducible (results depend on which sibling modules happen to be present at build time).
 
 ## Vulnerability Scanning
 
@@ -58,6 +60,23 @@ govulncheck ./...  # Run before releases and in CI
 ```
 
 `go get` modifies go.mod. `go install` installs binaries without touching go.mod.
+
+## CI Validation
+
+Two checks CI should enforce on every PR:
+
+```bash
+# Fail if go.mod or go.sum would be modified by `go mod tidy`
+go mod tidy -diff || {
+  echo "go.mod or go.sum out of sync — run 'go mod tidy' locally and commit" >&2
+  exit 1
+}
+
+# Fail on known vulnerabilities in the current dependency graph
+govulncheck ./...
+```
+
+The `tidy -diff` check catches the common failure mode where a developer adds an import but forgets to run `go mod tidy`, leaving `go.sum` out of sync. The govulncheck catches transitive-dep CVEs that only surface when the graph is walked.
 
 ## Versioning Strategy
 
@@ -69,14 +88,19 @@ govulncheck ./...  # Run before releases and in CI
 
 ## Anti-Patterns
 
-- Not committing go.sum — always commit both go.mod and go.sum
-- Replace in production — remove before releasing
-- Skipping `go mod tidy` — run after every dependency change
-- Blindly using @latest — pin versions
+- **Not committing `go.sum`** — always commit both `go.mod` and `go.sum`; `go.sum` is what makes builds reproducible
+- **`replace` in production** — remove before releasing; a `replace` pointing to a fork or a local path breaks downstream consumers
+- **Skipping `go mod tidy`** — run after every dependency change; CI should enforce this via `go mod tidy -diff`
+- **Blindly using `@latest`** — `go get foo@latest` resolves at that moment; six months later a different version ships, your build changes, and nobody knows why. Pin to an exact version (`go get foo@v1.2.3`) and bump deliberately.
+- **Committing `go.work`** — workspace mode is local-only; committing it makes CI builds non-reproducible
+- **Forgetting `govulncheck` before release** — vulnerabilities in transitive deps are the common case; scan every release build
 
 ## Verification
 
-- [ ] `go mod tidy` produces no changes (module files already clean)
+- [ ] `go mod tidy -diff` produces no output (module files already clean)
 - [ ] `go.sum` is committed alongside `go.mod`
+- [ ] `go.work` and `go.work.sum` are in `.gitignore` (never committed)
 - [ ] No `replace` directives in `go.mod` for production builds
+- [ ] All dependencies pinned to exact versions (no `@latest`)
 - [ ] `govulncheck ./...` passes with no known vulnerabilities
+- [ ] CI enforces both `go mod tidy -diff` and `govulncheck` on every PR

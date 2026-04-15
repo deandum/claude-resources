@@ -81,6 +81,27 @@ BeforeEach(func() {
 })
 ```
 
+## Async Assertions
+
+For tests that wait for a condition to become true (timing-sensitive code, eventual consistency, background goroutines), use `Eventually` and `Consistently` instead of `time.Sleep`:
+
+```go
+It("marks the job complete within 5 seconds", func() {
+    go worker.Process(jobID)
+    Eventually(func() string {
+        return worker.Status(jobID)
+    }, 5*time.Second, 100*time.Millisecond).Should(Equal("complete"))
+})
+
+It("keeps the connection healthy for 10 seconds", func() {
+    Consistently(func() bool {
+        return client.IsConnected()
+    }, 10*time.Second, 500*time.Millisecond).Should(BeTrue())
+})
+```
+
+`Eventually` polls until the assertion passes or the timeout expires. `Consistently` fails if the assertion ever fails during the duration. Both take `(timeout, pollingInterval)` as trailing arguments. These replace `time.Sleep` in tests — sleeping is slow (takes the full duration) and flaky (may miss a fast state change).
+
 ## Running
 
 ```bash

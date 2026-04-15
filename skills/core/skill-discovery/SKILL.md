@@ -6,11 +6,19 @@ description: >
 user-invocable: false
 ---
 
+<!-- meta-skill: skip-anatomy -->
+
 # Skill Discovery
 
 Route tasks to the right agent. Follow the first matching branch.
 
 **Cross-cutting:** All agents load `core/token-efficiency` — compresses human-facing output, never specs or agent-to-agent artifacts. Use `/compact` to adjust level.
+
+## How to Use This Tree
+
+1. **Language detection is automatic.** The session-start hook emits `detected_languages` in the session context. Agents read it directly; the tree does not need to branch on language.
+2. **Follow the first matching branch.** Branches are ordered roughly by specificity. When a task matches multiple branches, choose the **most specific** one (e.g., "write tests for a new feature" → `tester`, not `builder`; "design a new HTTP API" → `architect`, not `builder`; "debug the failing test" → `debugging` + `tester`, not just `tester`).
+3. **External writes are gated.** Any task that pushes, creates PRs, publishes releases, or pushes container images requires `ops_enabled=true` in session context — the opt-in `ops-skills` plugin. If disabled, report the action as a follow-up; do not execute. See the "Push, PR, release" branch at the bottom of the tree.
 
 ## Decision Tree
 
@@ -34,6 +42,22 @@ When a task arrives, follow the first matching branch:
   - **reviewer** → `core/code-review` + `lang/code-review`
 - **Containerize, add logging, metrics, or tracing?**
   - **shipper** → `core/docker` + `core/observability` + `lang/*`
+- **Refactor, remove code, or simplify?**
+  - **reviewer** (or **builder** if applying) → `core/simplification`
+- **Debug a bug, failing test, or incident?**
+  - **builder** → `core/debugging` + `core/testing`
+- **Security design, threat model, authz/authn?**
+  - **architect** → `core/security` (design-time); review-time covered by `core/code-review` §4
+- **Performance issue, profiling, benchmark?**
+  - **builder** or **reviewer** → `core/performance`
+- **Write ADR, README, design doc?**
+  - **architect** → `core/documentation`
+- **Commit (local only)?**
+  - **builder** or **shipper** → `core/git-workflow`
+- **Push, PR, release, or registry push (external writes)?**
+  - Requires `ops-skills` opt-in. Check `ops_enabled` in session context.
+  - When `ops_enabled=true`: **shipper** → `ops/git-remote`, `ops/pull-requests`, `ops/release`, `ops/registry`
+  - When `ops_enabled=false` (default): report as follow-up; do not execute
 - **Unsure?**
   - **critic** → will clarify and route
 

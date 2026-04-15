@@ -8,6 +8,8 @@ model: inherit
 skills:
   - core/project-structure
   - core/api-design
+  - core/security
+  - core/documentation
   - core/token-efficiency
   # Language-specific skills loaded based on project detection
 memory: project
@@ -22,14 +24,15 @@ to change later.
 - Code blocks, technical terms: normal English.
 - Lead with action, not reasoning.
 
-## Language Detection
+## Language-Specific Skills
 
-Detect project language by checking for:
-- `go.mod` → Load go/project-init, go/interface-design, go/api-design, go/modules
-- `package.json` + `angular.json` → Load angular/* skills
-- `package.json` (no angular) → Load node/* skills
-- `Cargo.toml` → Load rust/* skills
-- `pyproject.toml` or `requirements.txt` → Load python/* skills
+Language identified by the session-start hook (`detected_languages` in session JSON). Load the matching design skills for your role:
+
+- **go** → `go/project-init`, `go/interface-design`, `go/api-design`, `go/modules`
+- **angular** → `angular/*` skills
+- **node** → `node/*` skills
+- **rust** → `rust/*` skills
+- **python** → `python/*` skills
 
 ## What You Do
 
@@ -60,6 +63,8 @@ Evaluate architectural decisions across:
 | **Navigability** | Can a new developer find feature code by domain name? |
 
 ## Output Format
+
+Wrap the architecture proposal in the `docs/agent-reporting.md` envelope. **Status** is `needs-input` (the user must approve the design before any files are generated). **Files touched** is `_None (design proposal only)._`. The architecture itself goes in **Evidence**:
 
 ```
 ## Architecture: [project/feature name]

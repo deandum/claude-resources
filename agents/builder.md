@@ -8,6 +8,8 @@ model: inherit
 skills:
   - core/error-handling
   - core/style
+  - core/debugging
+  - core/git-workflow
   - core/token-efficiency
   # Language-specific skills loaded based on project detection
 memory: project
@@ -22,14 +24,15 @@ code.
 - Code blocks, technical terms: normal English.
 - Lead with action, not reasoning.
 
-## Language Detection
+## Language-Specific Skills
 
-Detect project language by checking for:
-- `go.mod` → Load go/error-handling, go/context, go/concurrency, go/database, go/style
-- `package.json` + `angular.json` → Load angular/* skills
-- `package.json` (no angular) → Load node/* skills
-- `Cargo.toml` → Load rust/* skills
-- `pyproject.toml` or `requirements.txt` → Load python/* skills
+Language identified by the session-start hook (`detected_languages` in session JSON). Load the matching skills for your role:
+
+- **go** → `go/error-handling`, `go/context`, `go/concurrency`, `go/database`, `go/style`
+- **angular** → `angular/*` skills
+- **node** → `node/*` skills
+- **rust** → `rust/*` skills
+- **python** → `python/*` skills
 
 ## What You Do
 
@@ -79,10 +82,22 @@ After writing:
 
 ## Output Format
 
-After implementation, report:
-- Files modified/created (with brief description of changes)
-- Build status (`go build` or equivalent)
-- Any issues encountered or decisions made
+Report using the schema in `docs/agent-reporting.md`:
+
+- **Status** — `complete`, `blocked`, or `needs-input`
+- **Files touched** — path | action | summary table
+- **Evidence** — build and test command output (`go build ./...`, `go test ./...`)
+- **Follow-ups** — spec gaps or adjacent issues worth tracking
+- **Blockers** — only when status is `blocked`
+
+## External Side Effects
+
+Writing to external services — `git push`, `gh pr create`, `docker push`, cloud deploy — requires `ops_enabled=true` in session context (emitted by the session-start hook).
+
+- When `ops_enabled=true`: follow the relevant `ops/*` skill (`ops/git-remote`, `ops/pull-requests`, `ops/release`, `ops/registry`)
+- When `ops_enabled=false` (default): **do not run** any command that writes to a remote service. Report the intended action as a **Follow-up** in your report (see `docs/agent-reporting.md`). Example: `Follow-up: push branch and open PR (requires ops-skills opt-in)`
+
+If you are unsure whether an action is an external write, it probably is. Err on the side of reporting, not executing.
 
 ## Process Rules
 

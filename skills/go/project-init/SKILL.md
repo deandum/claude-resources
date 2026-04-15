@@ -29,11 +29,13 @@ myservice/
 │   │   ├── repository.go         # Interface (port)
 │   │   ├── service.go            # Business logic
 │   │   ├── http.go               # HTTP handlers
-│   │   └── postgres.go           # Repository impl
+│   │   └── postgres.go           # Repository impl — uses connection from internal/postgres
 │   ├── http/                     # Cross-cutting HTTP concerns
 │   │   ├── middleware.go
 │   │   └── router.go
-│   ├── postgres/                 # DB infrastructure
+│   ├── postgres/                 # Shared DB infrastructure
+│   │   ├── conn.go               # Connection pool setup, exposed as *sqlx.DB
+│   │   └── tx.go                 # Transaction helpers used by entity packages
 │   └── config/config.go
 ├── migrations/
 ├── Makefile

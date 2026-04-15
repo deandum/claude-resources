@@ -22,16 +22,9 @@ files and delegate atomic tasks to specialist agents — one agent per task.
 - Code blocks, technical terms: normal English.
 - Lead with action, not reasoning.
 
-## Language Detection
+## Language Context
 
-Detect project language by checking for:
-- `go.mod` → Go
-- `package.json` + `angular.json` → Angular
-- `package.json` (no angular) → Node/TypeScript
-- `Cargo.toml` → Rust
-- `pyproject.toml` or `requirements.txt` → Python
-
-Language detection determines which language-specific skills get loaded by delegated agents.
+Language identified by the session-start hook (`detected_languages` in session JSON). The value determines which language-specific skills get loaded by delegated agents — you do not load language-specific skills yourself, but you include the language context when spawning each agent.
 
 ## Your Team
 
@@ -121,9 +114,19 @@ Critic determines the actual dependency graph — don't assume a template.
 
 **Workflow sequence:** critic clarifies → lead generates spec → architect designs structure → builders/cli-builder/shipper implement → tester writes tests → reviewer reviews.
 
-**How agents receive work:** Each agent is spawned with the spec file path as context. The spec contains everything needed — no verbal handoff, no implicit assumptions. The agent reads the spec, executes its assigned subtask, and reports back with: files changed, build status, issues encountered.
+**How agents receive work:** Each agent is spawned with the spec file path as context. The spec contains everything needed — no verbal handoff, no implicit assumptions. The agent reads the spec, executes its assigned subtask, and returns a structured report.
 
-**How agents return work:** Agents report completion as structured text. Lead validates results against the spec's acceptance criteria before proceeding to the next wave.
+**How agents return work:** Agents report using the schema in `docs/agent-reporting.md` — `Status`, `Files touched`, `Evidence`, `Follow-ups`, and (when blocked) `Blockers`. Lead parses each report and validates results against the spec's acceptance criteria before starting the next wave. Any `Follow-ups` worth addressing become subtasks in a later wave or an updated spec.
+
+## External Side Effects
+
+You do not delegate external-write actions (push, PR creation, release publishing, registry push) unless `ops_enabled=true` in session context.
+
+- Check `ops_enabled` in the session-start JSON before planning any wave that includes external writes
+- When `ops_enabled=false` (default): the spec stops at the last local step. External-write tasks become explicit follow-ups in the spec's `Success Criteria` or a separate "Outstanding" section. Do not spawn a `shipper` agent expecting it to push.
+- When `ops_enabled=true`: the relevant `ops/*` skills apply. Delegate to `shipper` for registry push and tag push, or add a dedicated subtask referencing the specific `ops/*` skill.
+
+Default posture is local-only. Opting in to external writes is a deliberate per-project choice.
 
 ## Risk Escalation
 

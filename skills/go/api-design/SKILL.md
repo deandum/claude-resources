@@ -106,3 +106,4 @@ Chi built-in middleware: `middleware.RequestID`, `RealIP`, `Logger`, `Recoverer`
 - [ ] Middleware applied in correct order (RequestID, Logging, Recover)
 - [ ] Chi URL params extracted with `chi.URLParam(r, "param")`
 - [ ] JSON decoding uses `DisallowUnknownFields` to reject unexpected fields
+- [ ] Handler integration tests exercise the full middleware chain (not just the handler in isolation) to catch ordering bugs and timeout interactions

@@ -20,7 +20,7 @@ The result: AI agents that work the way senior engineers do — clarify before b
 
 - **Claude Code** CLI or IDE extension
 - **Git** for plugin installation and project detection
-- **python3** for operational learning (JSONL encoding/parsing in hooks)
+- **Bash 4+** — hooks are pure bash; no python or other runtime required
 
 ## Quick Start
 
@@ -88,18 +88,18 @@ All agents auto-detect project language and load appropriate skills.
 
 ## Skills
 
-### Core (13 language-agnostic workflow skills)
+### Core (19 language-agnostic workflow skills)
 
 Organized by development phase:
 
 | Phase | Skills | Purpose |
 |-------|--------|---------|
 | **Define** | `idea-refine` `spec-generation` `skill-discovery` | Clarify requirements, generate specs |
-| **Plan** | `project-structure` `api-design` | Design architecture and APIs |
-| **Build** | `error-handling` `concurrency` `style` | Implementation discipline |
+| **Plan** | `project-structure` `api-design` `documentation` | Design architecture, interfaces, record decisions |
+| **Build** | `error-handling` `concurrency` `style` `debugging` | Implementation discipline |
 | **Test** | `testing` | Test strategy and verification |
-| **Review** | `code-review` | Five-axis quality review |
-| **Ship** | `docker` `observability` | Production readiness |
+| **Review** | `code-review` `simplification` `security` `performance` | Quality disciplines (design-time and review-time) |
+| **Ship** | `docker` `observability` `git-workflow` | Release and production readiness |
 | **Cross-cutting** | `token-efficiency` | Output compression and cost control |
 
 Every core skill follows a standard anatomy: **When to Use**, **When NOT to Use**, **Core Process**, **Common Rationalizations** (shortcuts that sound reasonable but aren't), **Red Flags**, and **Verification**. See [Skill Anatomy](docs/skill-anatomy.md).
@@ -114,6 +114,31 @@ Every core skill follows a standard anatomy: **When to Use**, **When NOT to Use*
 | **Quality** | `testing` `testing-with-framework` `code-review` `style` |
 | **APIs** | `cli` `api-design` |
 | **Deployment** | `docker` `observability` `project-init` |
+
+### Ops (4 opt-in external-write skills — NOT enabled by default)
+
+The `ops-skills` plugin is separate and **not installed by default**. Install it only in projects where Claude is authorized to write to external services (push to git, create PRs, publish releases, push container images).
+
+| Skill | Purpose |
+|-------|---------|
+| `git-remote` | `git push`, force-push policy, upstream tracking, tag push |
+| `pull-requests` | `gh pr create`, PR templates, review response, merge strategy |
+| `release` | Semver decision, tag creation, changelog, GitHub Releases |
+| `registry` | `docker push`, tag strategy, image signing, registry authentication |
+
+**How detection works.** The `session-start.sh` hook checks whether `skills/ops/` is present and populated. If yes, `ops_enabled: true` is emitted in the session JSON; agents consult this flag before running any external-write command. If no, agents refuse to run the command and report it as a follow-up instead.
+
+**Installing the ops plugin:**
+
+```bash
+# Via marketplace (when claude-resources is published)
+claude plugin add ops-skills
+
+# Or, if working from a local clone, the skills/ops/ directory is already present
+# and session-start.sh will detect it automatically.
+```
+
+**Not installing it.** The default state (no ops plugin) means every external-write action surfaces as a follow-up in agent reports — the user sees what Claude *would* do, but Claude does not execute it. This is the recommended default for any project where unintended side effects would be costly.
 
 ## Spec-Driven Workflow
 
@@ -155,7 +180,7 @@ See [Operational Learning](docs/operational-learning.md) for full documentation.
 
 ```
 skills/
-├── core/              # 13 language-agnostic workflow skills
+├── core/              # 19 language-agnostic workflow skills
 │   ├── idea-refine/
 │   ├── spec-generation/
 │   ├── skill-discovery/

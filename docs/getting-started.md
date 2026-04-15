@@ -6,8 +6,8 @@ Onboarding guide for the claude-resources framework -- a multi-language, spec-dr
 
 - **Claude Code** CLI or IDE extension installed and configured
 - **Git** for plugin installation and project detection
-- **python3** for operational learning (JSONL encoding/parsing in hooks)
-- **ast-grep** for structural code search
+- **Bash 4+** — hooks are pure bash; no python or other runtime required
+- **ast-grep** for structural code search (optional but recommended)
 
 ## Installation
 
@@ -191,7 +191,7 @@ The key principle: verbose output burns tokens without adding value, but specs s
 ## Troubleshooting
 
 **Language not detected?**
-Check that marker files exist in your project root. The detection happens in `session-start.sh` and in each slash command's Language Detection section. For Go, ensure `go.mod` is present. For Node, ensure `package.json` exists.
+Check that marker files exist in your project root. Detection runs in `session-start.sh` and emits `detected_languages` in the session JSON context. For Go, ensure `go.mod` is present. For Node, ensure `package.json` exists.
 
 **Skills not loading?**
 Verify the skill is registered in `.claude-plugin/marketplace.json`. Each skill needs an entry under the correct plugin group.
@@ -200,7 +200,20 @@ Verify the skill is registered in `.claude-plugin/marketplace.json`. Each skill 
 Check the Language Detection section in the agent file under `agents/`. Each agent has detection logic that maps marker files to language tiers.
 
 **Learnings not appearing?**
-Check that `~/.claude-resources/learnings/` directory exists. Verify the project slug matches your git root basename: `basename $(git rev-parse --show-toplevel)`. Ensure `python3` is available (used to parse JSONL in `session-start.sh`).
+Check that `~/.claude-resources/learnings/` directory exists. Verify the project slug matches your git root basename: `basename $(git rev-parse --show-toplevel)`. Confirm the JSONL file has one valid JSON object per line with a `learning` field.
 
 **Hooks not running?**
 Check `hooks/hooks.json` is properly formatted. The file registers `SessionStart` and `SessionEnd` lifecycle hooks. Verify the scripts are executable: `ls -la hooks/*.sh`.
+
+For deeper troubleshooting on any of the above, see [troubleshooting.md](troubleshooting.md).
+
+## Next Steps
+
+Now that you have the framework installed and have walked through a workflow, these docs are the natural next reads:
+
+- **[architecture.md](architecture.md)** — understand the four building blocks (skills, agents, commands, hooks) and how they connect
+- **[commands.md](commands.md)** — full reference for all 10 slash commands
+- **[agents.md](agents.md)** — full reference for all 8 specialist agents
+- **[skills-catalog.md](skills-catalog.md)** — browse the 38 skills by tier and phase
+- **[workflow.md](workflow.md)** — deep dive on the spec-driven workflow and SPEC file template
+- **[extending.md](extending.md)** — add new skills, agents, or commands to your install

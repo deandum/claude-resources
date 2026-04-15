@@ -69,6 +69,10 @@ func FetchAll(ctx context.Context, urls []string) ([]Result, error) {
 ## Pattern 4: Pipeline
 
 ```go
+// Pipeline reads from input, transforms each value, and writes to out.
+// The SENDER of `input` owns closing it; when input closes, the range
+// loop exits and this stage closes `out` via the deferred close.
+// Context cancellation exits immediately without draining input.
 func Pipeline(ctx context.Context, input <-chan int) <-chan int {
     out := make(chan int)
     go func() {
@@ -83,6 +87,8 @@ func Pipeline(ctx context.Context, input <-chan int) <-chan int {
     return out
 }
 ```
+
+Pipeline stages chain by passing the output channel of one stage as the input of the next. Each stage is responsible for closing its own output; each stage expects its input to be closed by its sender. This is the key invariant — violating it causes goroutine leaks (blocked on send) or panics (send on closed channel).
 
 ## Pattern 5: Rate Limiter
 

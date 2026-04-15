@@ -1,8 +1,14 @@
 ---
 name: docker
 description: >
-  Containerization principles. Use when containerizing for production,
-  optimizing images, or reviewing Dockerfiles. Pair with language-specific
+  Containerization principles — multi-stage builds, base image
+  selection, layer caching, security. Use when containerizing a
+  service, shrinking a bloated image, chasing CVEs in a base image,
+  adding non-root + distroless to an existing Dockerfile, or
+  reviewing any `Dockerfile` / `.dockerignore` changes. Trigger on
+  any task mentioning "docker", "container", "image", "base image",
+  or "deploy to kubernetes" — even when the user does not
+  explicitly say "use the docker skill". Pair with language-specific
   docker skill for build patterns.
 ---
 

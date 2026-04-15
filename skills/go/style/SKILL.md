@@ -11,7 +11,7 @@ Derived from Effective Go, Google's Go Style Guide, Uber's Go Style Guide.
 
 ## Formatting
 
-- Always use `gofmt`/`goimports` — non-negotiable
+- Always use `gofmt`/`goimports` — non-negotiable. Local: `goimports -w ./...`. CI: `gofmt -l ./... | tee /dev/stderr` should produce no output (fail the build if it does).
 - Import groups: stdlib, external, internal (separated by blank lines)
 
 ```go
@@ -49,10 +49,10 @@ import (
 
 - Mutates receiver → pointer
 - Large struct → pointer
-- Contains sync.Mutex → pointer
+- Contains `sync.Mutex` → pointer
 - Map, func, chan → value
 - Small immutable struct → value
-- Be consistent across all methods
+- **Be consistent across all methods on the same type.** If any method on `T` uses a pointer receiver (`*T`), every method on `T` should use a pointer receiver. Mixing pointer and value receivers on the same type is a bug waiting to happen — callers can silently lose writes, and method sets differ between `T` and `*T` in ways that break interface satisfaction.
 
 ## Code Organization
 
@@ -66,7 +66,7 @@ import (
 - God structs (>7-8 fields)
 - Interfaces >5 methods
 - Returning interfaces instead of concrete types
-- `init()` functions (prefer explicit init)
+- `init()` functions for business logic — acceptable only for side-effect registration (Cobra commands, flag parsers, test fixtures)
 - Naked `bool` params (use named types)
 - Deep package nesting (>3 levels)
 
@@ -76,7 +76,9 @@ Use `.golangci.yml` from [templates/golangci.yml](templates/golangci.yml).
 
 ## Verification
 
-- [ ] `gofmt`/`goimports` applied with no formatting diff
+- [ ] `gofmt -l ./...` produces no output
+- [ ] `goimports -w ./...` has been run (import groups stdlib / external / internal)
 - [ ] `golangci-lint run` passes with no warnings or errors
 - [ ] Initialisms are all caps (`ID`, `URL`, `HTTP`, `API` — not `Id`, `Url`)
 - [ ] All exported types, functions, and constants have doc comments
+- [ ] Receiver types are consistent within each type (all pointer or all value)

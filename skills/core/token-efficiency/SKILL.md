@@ -1,9 +1,14 @@
 ---
 name: token-efficiency
 description: >
-  Output compression and cost-awareness rules. Reduces human-facing output
-  tokens without affecting reasoning, specs, or agent-to-agent communication.
-  Loaded by all agents. Use /compact to switch levels.
+  Output compression for human-facing responses. Use when responding
+  to users in a terminal, writing end-of-turn summaries, explaining
+  diffs, producing status updates, or any non-artifact output
+  addressed to a human reader. Specifies what to compress (articles,
+  filler, pleasantries, hedging) and what to leave full-fidelity
+  (SPEC files, agent-to-agent reports, commands, code blocks, paths,
+  acceptance criteria, inline docstrings). Triggered automatically
+  by the /compact slash command and loaded by all agents by default.
 ---
 
 # Token Efficiency
@@ -40,10 +45,7 @@ Specs are prompts for other agents. Compressing them degrades downstream agent p
 
 ### Standard (default)
 
-- Drop articles (a, an, the) where meaning is preserved
-- Drop filler words (just, really, basically, actually, simply)
-- Drop pleasantries (sure, certainly, of course, happy to)
-- Drop hedging (I think, perhaps, it seems, it might be worth)
+- Drop articles (a, an, the), filler (just, really, basically, actually, simply), hedging (I think, perhaps, it seems), and pleasantries (sure, certainly, of course, happy to) — unless dropping them would change meaning
 - Lead with action or result, not reasoning
 - Fragments acceptable
 - No restating the task back to the user

@@ -6,6 +6,8 @@ description: >
   before spec generation. Triggers: "ideate", "brainstorm", "refine idea".
 ---
 
+<!-- meta-skill: invoked via /ideate command, not loaded into agent skills lists -->
+
 # Idea Refine
 
 Refine raw ideas into sharp, actionable concepts before writing a spec.

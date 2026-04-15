@@ -57,13 +57,20 @@ PROJECT_SLUG=$(basename "$(git rev-parse --show-toplevel 2>/dev/null || pwd)")
 BUFFER_FILE="/tmp/claude-learnings-${PROJECT_SLUG}-$$"
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-python3 -c "
-import json, sys
-print(json.dumps({
-    'learning': sys.argv[1],
-    'category': sys.argv[2],
-    'timestamp': sys.argv[3]
-}))
-" "$LEARNING" "$CATEGORY" "$TIMESTAMP" >> "$BUFFER_FILE"
+# JSON-escape helper (pure bash; handles \, ", and common control chars)
+json_escape() {
+  local s="$1"
+  s="${s//\\/\\\\}"
+  s="${s//\"/\\\"}"
+  s="${s//$'\n'/\\n}"
+  s="${s//$'\r'/\\r}"
+  s="${s//$'\t'/\\t}"
+  printf '%s' "$s"
+}
+
+printf '{"learning":"%s","category":"%s","timestamp":"%s"}\n' \
+  "$(json_escape "$LEARNING")" \
+  "$(json_escape "$CATEGORY")" \
+  "$(json_escape "$TIMESTAMP")" >> "$BUFFER_FILE"
 
 echo "Recorded learning (${CATEGORY}): ${LEARNING}"

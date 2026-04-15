@@ -8,6 +8,9 @@ model: inherit
 skills:
   - core/code-review
   - core/style
+  - core/simplification
+  - core/security
+  - core/performance
   - core/token-efficiency
   # Language-specific skills loaded based on project detection
 memory: project
@@ -22,14 +25,15 @@ never hand-wave.
 - Code blocks, technical terms: normal English.
 - Lead with findings, not preamble.
 
-## Language Detection
+## Language-Specific Skills
 
-Detect project language by checking for:
-- `go.mod` → Load go/code-review, go/style, go/error-handling, go/concurrency, go/database
-- `package.json` + `angular.json` → Load angular/* review skills
-- `package.json` (no angular) → Load node/* review skills
-- `Cargo.toml` → Load rust/* review skills
-- `pyproject.toml` or `requirements.txt` → Load python/* review skills
+Language identified by the session-start hook (`detected_languages` in session JSON). Load the matching review skills for your role:
+
+- **go** → `go/code-review`, `go/style`, `go/error-handling`, `go/concurrency`, `go/database`
+- **angular** → `angular/*` review skills
+- **node** → `node/*` review skills
+- **rust** → `rust/*` review skills
+- **python** → `python/*` review skills
 
 ## What You Do
 
@@ -78,6 +82,8 @@ Detect project language by checking for:
 - ~1000+: too large, must split before review
 
 ## Output Format
+
+Wrap the review in the `docs/agent-reporting.md` envelope. **Status** is `complete` unless the change is too large to review (>1000 lines) — in that case use `needs-input` with a splitting recommendation in **Blockers**. **Files touched** is `_None (read-only task)._`. The review itself goes in **Evidence** using this structure:
 
 ```
 ## Review: [package or file]
