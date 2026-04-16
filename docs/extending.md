@@ -311,6 +311,51 @@ ok  	example/pkg/service	0.203s
 | "No follow-ups needed." | Maybe. But did you really look? If nothing, write `_None._` — don't omit the section. |
 | "I'll report success and mention the blocker in passing." | Split: either `complete` with follow-ups, or `blocked` with Blockers. Not both. |
 
+## Authoring a project constitution
+
+A constitution is the list of invariants reviewer and critic enforce on every diff. It lives at `docs/constitution.md` in the consumer project. The session-start hook reads it, emits `project_constitution` into session context, and agents grade against it without additional file reads.
+
+1. **Copy the template:** `cp EXAMPLE_CONSTITUTION.md docs/constitution.md`.
+2. **Edit the `invariants:` frontmatter list.** Each entry has `id` (kebab-case) and `severity` (`critical` or `important`).
+3. **Write a body section per invariant** with `**Enforced by:**`, `**Scope:**`, `**Rationale:**`, `**Detection:**`. All four fields are required.
+4. **Keep the list short.** 3–10 invariants. Anything longer is a checklist; split it into lints, skills, or CLAUDE.md conventions.
+5. **Use `critical` sparingly.** `critical` blocks advancement — reviewer returns `needs-input`. `important` flags without blocking.
+
+See [`skills/core/constitution/SKILL.md`](../skills/core/constitution/SKILL.md) for authoring guidance, severity semantics, and sunsetting rules.
+
+## Parallelization markers in specs
+
+Every subtask in `spec.md` carries a `[P]` prefix declaring "this task is safe to run simultaneously with every other task in this group." The marker makes the framework's parallel-by-group default explicit and auditable.
+
+```markdown
+### Group 1: Scaffold storage layer (parallel)
+- [ ] **[P] builder** — create repository interface in pkg/user/repo.go
+  - Files: pkg/user/repo.go
+  - Done when: interface compiles with zero implementations
+- [ ] **[P] builder** — create service interface in pkg/user/service.go
+  - Files: pkg/user/service.go
+  - Done when: interface compiles
+```
+
+If a task cannot honestly carry `[P]` (it reads files another task in the same group writes), split it into its own group. Reviewer audits the marker against the `Files:` list during mini-review — overlapping writes with `[P]` markers is a Critical finding.
+
+## Contracts artifact structure
+
+`docs/specs/<slug>/contracts.md` is an optional fifth spec artifact for API/data-heavy work. Lead copies it at Step 1 when the task description contains API/data markers (`REST`, `endpoint`, `schema`, `webhook`, `event`, `payload`, `migration`, `API`). Architect populates it after spec approval. Reviewer validates implementation against it during mini-review — mismatches are Critical findings.
+
+Required sections:
+
+| Section | Content |
+|---------|---------|
+| Endpoints | Table: Method, Path, Purpose, Auth |
+| Request Schemas | JSON shape per endpoint; field types and constraints |
+| Response Schemas | Success + error shapes |
+| Error Codes | Table: Code, HTTP Status, Condition, Response `details` |
+| Events | Per-event type and payload (if any) |
+| Data Invariants | Cross-cutting rules (e.g., "email stored lowercase") |
+
+If a section has no content for the current task, state `_None._` rather than deleting the heading — reviewer uses section presence as a checklist.
+
 ## Style rules for new skill content
 
 Skills are parsed by agents at runtime. The writing style matters.

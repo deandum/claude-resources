@@ -19,6 +19,7 @@
         "./skills/core/api-design",
         "./skills/core/code-review",
         "./skills/core/concurrency",
+        "./skills/core/constitution",
         "./skills/core/debugging",
         "./skills/core/discovery",
         "./skills/core/docker",

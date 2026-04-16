@@ -38,13 +38,15 @@ updated: <ISO-8601 date>
 
 ## Subtasks
 
+<!-- [P] = parallel-safe with every other task in its group. Every task must carry [P] — if a task is not parallel-safe with its siblings, move it to its own group. -->
+
 ### Group 1: [description] (parallel)
-- [ ] **[agent]** — [one-sentence task description]
+- [ ] **[P] [agent]** — [one-sentence task description]
   - Files: [specific files]
   - Done when: [acceptance criterion]
 
 ### Group 2: [description] (depends on Group 1)
-- [ ] **[agent]** — [one-sentence task description]
+- [ ] **[P] [agent]** — [one-sentence task description]
   - Files: [specific files]
   - Done when: [acceptance criterion]
 

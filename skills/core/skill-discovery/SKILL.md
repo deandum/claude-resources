@@ -67,6 +67,8 @@ When a task arrives, follow the first matching branch:
   - **builder** or **reviewer** → `core/performance`
 - **Write ADR, README, design doc?**
   - **architect** → `core/documentation`
+- **Author or modify project invariants?**
+  - **architect** (or **critic** if evaluating whether an invariant is warranted) → `core/constitution`
 - **Commit (local only)?**
   - **builder** or **shipper** → `core/git-workflow`
 - **Push, PR, release, or registry push (external writes)?**

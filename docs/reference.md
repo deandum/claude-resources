@@ -1,6 +1,6 @@
 # Reference
 
-Single reference page for everything the framework ships: 10 commands, 9 agents, and 39 skills. Each entry links to the authoritative file — this page is an index, not a second copy.
+Single reference page for everything the framework ships: 10 commands, 9 agents, and 40 skills. Each entry links to the authoritative file — this page is an index, not a second copy.
 
 ## Commands
 
@@ -50,9 +50,9 @@ Shared conventions:
 
 ## Skills
 
-39 total: 20 core (language-agnostic), 15 Go (language-specific), 4 ops (opt-in external writes).
+40 total: 21 core (language-agnostic), 15 Go (language-specific), 4 ops (opt-in external writes).
 
-### Core skills (20) — language-agnostic
+### Core skills (21) — language-agnostic
 
 Every core skill follows the same anatomy: When to Use, When NOT, Core Process, Common Rationalizations, Red Flags, Verification. See [extending.md](extending.md#skill-anatomy) for the full template.
 
@@ -104,6 +104,12 @@ Every core skill follows the same anatomy: When to Use, When NOT, Core Process, 
 | [docker](../skills/core/docker/SKILL.md) | Multi-stage builds, base image selection, layer caching, security. |
 | [observability](../skills/core/observability/SKILL.md) | Structured logging, RED/USE metrics, distributed tracing, health checks, alerting. |
 | [git-workflow](../skills/core/git-workflow/SKILL.md) | Local git discipline — commit hygiene, branching, rebase, PR body content. |
+
+**Governance**
+
+| Skill | Purpose |
+|---|---|
+| [constitution](../skills/core/constitution/SKILL.md) | Author and maintain project invariants (`docs/constitution.md`) that reviewer and critic enforce. Severity-driven: `critical` blocks advancement, `important` flags without blocking. |
 
 **Cross-cutting**
 

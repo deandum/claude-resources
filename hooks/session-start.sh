@@ -67,6 +67,42 @@ if [ -f "$LEARNINGS_FILE" ]; then
   RECENT_LEARNINGS="$recent"
 fi
 
+# Load project constitution invariants (id + severity pairs) from docs/constitution.md.
+# Format in JSON: "id1(critical);id2(important);..." — parseable by agents without yq.
+PROJECT_CONSTITUTION=""
+CONSTITUTION_FILE="$PROJECT_ROOT/docs/constitution.md"
+if [ -f "$CONSTITUTION_FILE" ]; then
+  PROJECT_CONSTITUTION=$(awk '
+    BEGIN { in_fm = 0; in_inv = 0; id = ""; sev = ""; out = "" }
+    /^---[[:space:]]*$/ { if (!in_fm) { in_fm = 1; next } else { exit } }
+    !in_fm { next }
+    /^invariants:/ { in_inv = 1; next }
+    in_inv && /^[^[:space:]-]/ { in_inv = 0 }
+    in_inv && /^[[:space:]]*-[[:space:]]*id:/ {
+      if (id != "" && sev != "") {
+        out = out (out == "" ? "" : ";") id "(" sev ")"
+      }
+      sub(/^[[:space:]]*-[[:space:]]*id:[[:space:]]*/, "")
+      sub(/[[:space:]]+$/, "")
+      gsub(/"/, "")
+      id = $0
+      sev = ""
+    }
+    in_inv && /^[[:space:]]+severity:/ {
+      sub(/^[[:space:]]*severity:[[:space:]]*/, "")
+      sub(/[[:space:]]+$/, "")
+      gsub(/"/, "")
+      sev = $0
+    }
+    END {
+      if (id != "" && sev != "") {
+        out = out (out == "" ? "" : ";") id "(" sev ")"
+      }
+      print out
+    }
+  ' "$CONSTITUTION_FILE")
+fi
+
 # Scan for in-progress spec directories (status != complete).
 # One awk pass per spec replaces three sed|head|sed pipelines.
 ACTIVE_SPECS=""
@@ -184,7 +220,9 @@ cat <<JSON
   "user_plugins": "$(json_escape "$USER_PLUGINS")",
   "recent_learnings": "$(json_escape "$RECENT_LEARNINGS")",
   "active_specs": "$(json_escape "$ACTIVE_SPECS")",
+  "project_constitution": "$(json_escape "$PROJECT_CONSTITUTION")",
   "external_writes_policy": "Agents MUST check ops_enabled before executing any remote-write command (git push, gh pr, docker push, deploy). When ops_enabled=false, report the intended action as a Follow-up in the Agent Reporting format defined in docs/extending.md; do not execute.",
-  "spec_resumption_policy": "When active_specs is non-empty, lead surfaces the in-progress specs on first response and asks the user whether to resume (/orchestrate --resume <slug>), ignore, or mark blocked. See agents/lead.md Step 0."
+  "spec_resumption_policy": "When active_specs is non-empty, lead surfaces the in-progress specs on first response and asks the user whether to resume (/orchestrate --resume <slug>), ignore, or mark blocked. See agents/lead.md Step 0.",
+  "constitution_policy": "When project_constitution is non-empty, reviewer MUST check every diff against the listed invariants after the five-axis review. Critical-severity violations force Critical findings; important-severity violations force Important findings. Critic MUST use invariants as the reference frame for Scope Hazards during /define. Full invariant text lives at docs/constitution.md."
 }
 JSON

@@ -64,13 +64,23 @@ Use slash commands as entry points:
 <!-- Where spec artifacts are stored. Lead creates one directory per task. -->
 
 - Location: `docs/specs/<task-slug>/` (kebab-case slug derived from task title)
-- Four artifacts per task:
+- Four artifacts per task (plus an optional fifth):
   - `spec.md` — the contract (Objective, Scope, Technical Approach, Subtasks, Boundaries, Success Criteria) with YAML frontmatter tracking `status` and `current_group`
   - `discovery.md` — scout's findings: existing code, patterns, inherited gotchas
-  - `critique.md` — critic's analysis: gaps, XY problems, scope hazards
+  - `critique.md` — critic's analysis: gaps, XY problems, scope hazards, clarifying questions
   - `group-log.md` — append-only record of per-group sign-offs
+  - `contracts.md` (optional, API/data-heavy specs only) — endpoints, payload schemas, error codes; populated by architect
 - Approved specs are committed to version control
 - Resume an interrupted task with `/orchestrate --resume <task-slug>`
+
+## Constitution
+
+<!-- Optional but recommended. Project invariants reviewer and critic enforce. -->
+
+- Copy `EXAMPLE_CONSTITUTION.md` → `docs/constitution.md` and edit the invariant list.
+- Each invariant has `id`, `severity` (`critical` or `important`), `Enforced by`, `Scope`, `Rationale`, `Detection`.
+- `hooks/session-start.sh` emits the invariant list to every session; reviewer checks every diff against it; critic uses it as the Scope Hazards reference frame during `/define`.
+- CLAUDE.md (this file) is operational context (stack, commands, conventions). The constitution is enforced invariants. Keep them separate.
 
 ## Boundaries
 

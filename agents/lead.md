@@ -48,7 +48,9 @@ Read `active_specs` from session-start context. If populated and the user's requ
 
 ### Step 1: Create spec directory, spawn critic AND scout in parallel
 
-Derive a kebab-case slug from the task. Create `docs/specs/<slug>/` by copying every file from `skills/core/spec-generation/references/` into it. The copies are: `spec.md`, `discovery.md`, `critique.md`, `group-log.md`.
+Derive a kebab-case slug from the task. Create `docs/specs/<slug>/` by copying the four required templates from `skills/core/spec-generation/references/` into it: `spec.md`, `discovery.md`, `critique.md`, `group-log.md`.
+
+**Contracts check.** Scan the task description for API/data markers: `REST`, `gRPC`, `endpoint`, `handler`, `schema`, `webhook`, `event`, `message`, `payload`, `DB table`, `migration`, `API`. If any match, also copy `contracts.md` from the references directory. When unsure, defer the decision to Step 2b by adding a blocker question ("Spec may involve an HTTP/data contract. Copy contracts.md?") and copy contracts.md only if the user says yes.
 
 Then spawn both agents simultaneously with the full task — one call per agent, in the same response:
 
@@ -82,9 +84,43 @@ Reply `stop` to halt before any spec is written.
 
 Keep each bullet terse — headline findings only. Full detail lives in the artifacts; the user opens `discovery.md` / `critique.md` if they want more.
 
-- On `approve`: proceed to Step 3.
+- On `approve`: proceed to Step 2b.
 - On `correct: <text>`: rewrite the affected bullet in `discovery.md` or `critique.md`, re-present the summary.
 - On `stop`: update frontmatter `status: blocked`, halt.
+
+### Step 2b: Clarification round-trip
+
+Read `critique.md` under `## Clarifying Questions`. If the section says `_None_` or contains no `Blocker: yes` items, skip Step 2b entirely and proceed to Step 3.
+
+Otherwise, emit a `needs-input` report listing every `Blocker: yes` question with its suggested default:
+
+```
+## Clarifications needed — <slug>
+
+Blocker questions (must answer before spec synthesis):
+
+1. **Q:** <question text>
+   **Suggested default:** <default>
+
+2. **Q:** <question text>
+   **Suggested default:** <default>
+
+### Response
+Reply `answer: N <text>` to answer question N.
+Reply `default: N` to accept the suggested default for question N.
+Reply `default: all` to accept all suggested defaults.
+Reply `stop` to halt before synthesis.
+```
+
+Non-blocker questions (`Blocker: no`) are NOT surfaced — their suggested defaults apply silently. They exist only for the provenance trail.
+
+When all blocker questions have a response:
+
+1. Append a `## Resolutions` section to `critique.md` with the question, the chosen answer (or `default accepted`), and an ISO-8601 timestamp.
+2. Fold each answer into `spec.md` `Assumptions` with the tag `(from clarification)` so synthesis preserves the provenance. For example: `- Rate limit counters reset on process restart (from clarification)`.
+3. Proceed to Step 3.
+
+On `stop`: update frontmatter `status: blocked`, halt.
 
 ### Step 3: Synthesize spec.md from approved findings
 
@@ -92,6 +128,7 @@ Populate `spec.md` by folding the approved findings into the template sections:
 
 - Scout's Handoff items → `Assumptions` (marked "validated against codebase") and `Technical Approach > Files to Modify/Create`
 - Critic's Handoff items → `Scope > Out of Scope`, `Boundaries > Ask first`, and `Success Criteria` edge cases
+- `project_constitution` (session context) — if non-empty, mirror every `critical` invariant's id into `Boundaries > Never do` verbatim (e.g., `- Violates no-silent-failures (docs/constitution.md)`). `important` invariants need not be mirrored but may inform `Ask first` items when they intersect the task.
 
 The spec MUST include every section from the template:
 - Objective, Assumptions, Scope (in/out), Technical Approach (files table + decisions), Subtasks (organized in groups), Commands (exact with flags), Boundaries (3 tiers), Success Criteria (testable)
@@ -110,6 +147,8 @@ Set the frontmatter on `spec.md`:
 Present `spec.md` to the user. Do NOT proceed without sign-off. If the user requests changes, update the spec and re-present.
 
 On approval, update frontmatter: `status: approved`, `updated: <ISO-8601>`. Append the user's decision to the pre-seeded "Group 0: Spec approval" section in `group-log.md`.
+
+**Contracts population.** If `docs/specs/<slug>/contracts.md` exists and is still the raw template (unedited), spawn `architect` with `spec.md` and `discovery.md` as context. Architect fills in endpoints, request/response schemas, error codes, events, and data invariants from the approved spec. Architect returns `needs-input` for user review of the contracts before any builder task consumes them. Present the populated `contracts.md` for approval — same `approve` / `changes: <what>` / `stop` responses. Only then proceed to Step 5.
 
 ### Step 5: Execute groups with embedded mini-review + per-group sign-off
 
@@ -180,12 +219,14 @@ A task is the right size when:
 - Described in one sentence
 - Has one clear acceptance criterion
 - Agent can complete without waiting on concurrent tasks
+- Carries a `[P]` marker — parallel-safe with every sibling in its group
 
 A task is too big when:
 - Contains "and" — split at the "and"
 - Spans multiple packages — one task per package
 - Requires design AND implementation — architect first, builder second
 - Includes "with tests" — implementation and testing are separate tasks
+- Cannot honestly be marked `[P]` — if it reads files another task in the same group writes, split it into its own group
 
 ## Group Planning
 

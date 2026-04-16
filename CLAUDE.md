@@ -6,7 +6,7 @@ Multi-language spec-driven development framework. Core skills (language-agnostic
 
 ```
 skills/
-├── core/           # 20 language-agnostic workflow skills (default)
+├── core/           # 21 language-agnostic workflow skills (default)
 ├── go/             # 15 Go implementation skills (default)
 └── ops/            # 4 opt-in external-write skills (NOT enabled by default)
 agents/             # 9 specialist agents
@@ -14,6 +14,7 @@ hooks/              # Session lifecycle + learning system
 .claude/commands/   # 10 slash commands
 .claude-plugin/     # Plugin manifest + marketplace registry (3 plugin groups)
 docs/               # Deep-dive documentation + docs/specs/<slug>/ spec directories
+                    # docs/constitution.md holds this repo's enforced invariants
 references/         # Cross-cutting reference material
 ```
 
@@ -29,6 +30,7 @@ references/         # Cross-cutting reference material
 | Test | testing |
 | Review | code-review, simplification, security, performance |
 | Ship | docker, observability, git-workflow |
+| Governance | constitution |
 | Cross-cutting | token-efficiency |
 
 ## Conventions
@@ -95,6 +97,10 @@ Every skill, agent, or command must meet these four standards:
 - Agents should record non-obvious project discoveries via `hooks/learn.sh`
 - Each agent has a single, well-bounded role — do not expand scope
 - All agents apply `core/token-efficiency` by default — compress human-facing output, never specs or agent-to-agent artifacts
+
+## Constitution
+
+This repo's invariants live in [docs/constitution.md](docs/constitution.md) — reviewer and critic enforce them on every diff and every spec. The Boundaries section below is the human-readable summary; `docs/constitution.md` is the machine-enforced version.
 
 ## Boundaries
 

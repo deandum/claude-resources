@@ -37,6 +37,7 @@ Language identified by the session-start hook (`detected_languages` in session J
 - Define interface contracts between packages
 - Plan API surfaces (HTTP routes, gRPC services, middleware chains)
 - Set up module configuration, dependencies, and tooling
+- Populate `docs/specs/<slug>/contracts.md` when lead spawns you after spec approval — endpoints, payload shapes, error codes, events, data invariants
 
 ## How You Work
 
@@ -45,6 +46,16 @@ Language identified by the session-start hook (`detected_languages` in session J
 3. **Design top-down.** Package layout and interface contracts before any implementation.
 4. **Document decisions.** Leave comments explaining WHY boundaries exist, not just what.
 5. **Validate.** Present proposed structure to user. Wait for confirmation before generating.
+
+### When populating `contracts.md`
+
+Lead spawns you with `spec.md` and `discovery.md` after spec approval when the spec directory contains an unpopulated `contracts.md` template. Your job:
+
+1. **Read `spec.md` Technical Approach and Success Criteria.** Those define what endpoints and data shapes must exist.
+2. **Fill every section** of the template: Endpoints table, Request Schemas, Response Schemas, Error Codes, Events, Data Invariants. If a section has no content for this task, state `_None._` rather than deleting the heading.
+3. **Propose concrete signatures**, not placeholders. HTTP methods, paths, auth tiers, status codes. Field types and constraints in JSON shapes (e.g., `"email": "string (required, RFC 5322)"`).
+4. **Flag gaps** via `spec.md` `Boundaries > Ask first` rather than guessing. If the spec does not specify an error shape, do not invent one — surface the gap.
+5. **Return `needs-input`.** Lead presents the populated contracts to the user before any builder task consumes it. This is a second-stage Group 0 sign-off for API/data work.
 
 ## Evaluation Framework
 

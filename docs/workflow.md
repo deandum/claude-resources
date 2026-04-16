@@ -37,10 +37,12 @@ Three sub-phases: Understand and Expand, Evaluate and Converge, Sharpen and Ship
 |---|---|
 | **Who runs** | Lead agent (spawns critic and scout in parallel) |
 | **Input** | A task description or output from `/ideate` |
-| **Output** | Spec directory `docs/specs/<slug>/` with four artifacts: `spec.md`, `discovery.md`, `critique.md`, `group-log.md` |
+| **Output** | Spec directory `docs/specs/<slug>/` with four required artifacts (`spec.md`, `discovery.md`, `critique.md`, `group-log.md`) plus an optional fifth (`contracts.md`) for API/data-heavy specs |
 | **Key decisions** | What is in scope? What is explicitly out? What already exists? What are the assumptions? What are the acceptance criteria? |
 
-Two sign-off gates: the pre-spec findings review, then the spec itself. Critic writes `critique.md` (gaps, XY problems); scout writes `discovery.md` (prior art, patterns, gotchas). Lead presents the raw findings for user review before synthesizing `spec.md`. No implementation begins without explicit spec approval.
+Three sign-off gates: the pre-spec findings review, the clarification round-trip (when critic surfaces blocker questions), then the spec itself. Critic writes `critique.md` (gaps, XY problems, clarifying questions); scout writes `discovery.md` (prior art, patterns, gotchas). Lead presents the raw findings for user review, pauses at Step 2b if `critique.md` has `Blocker: yes` questions, then synthesizes `spec.md`. No implementation begins without explicit spec approval.
+
+**Contracts artifact.** At Step 1 lead scans the task description for API/data markers (`REST`, `endpoint`, `schema`, `webhook`, `event`, `payload`, `migration`, ...). If matched, lead copies `contracts.md` alongside the four required templates. After spec approval, `architect` populates it with endpoints, payload schemas, error codes, and data invariants. Reviewer treats contract mismatches as Critical findings during mini-review.
 
 For the full template, frontmatter schema, and sign-off protocol, see [`core/spec-generation/SKILL.md`](../skills/core/spec-generation/SKILL.md).
 
@@ -106,23 +108,27 @@ For complex tasks, `/orchestrate` coordinates the full workflow. See [`agents/le
 
 ## Spec directory
 
-Specs live under `docs/specs/<slug>/` as a directory of four artifacts. Templates live at `skills/core/spec-generation/references/` and are copied into place by lead when `/define` runs.
+Specs live under `docs/specs/<slug>/` as a directory of four required artifacts plus one optional artifact. Templates live at `skills/core/spec-generation/references/` and are copied into place by lead when `/define` runs.
 
 | File | Owner | Purpose |
 |------|-------|---------|
-| `spec.md` | lead | The contract. Template body + YAML frontmatter tracking execution state. |
+| `spec.md` | lead | The contract. Template body + YAML frontmatter tracking execution state. Every subtask carries a `[P]` parallelization marker. |
 | `discovery.md` | scout | Existing Surface, Patterns to Follow, Inherited Gotchas, Handoff to lead. |
-| `critique.md` | critic | Gaps, XY Problems, Scope Hazards, Handoff to lead. |
+| `critique.md` | critic | Gaps, XY Problems, Scope Hazards, Clarifying Questions, Resolutions, Handoff to lead. |
 | `group-log.md` | lead | Append-only. Group 0 records spec approval; Group N records group completion + user decision. |
+| `contracts.md` | architect | Optional. Copied at Step 1 for API/data-heavy specs; populated after spec approval. Endpoints, payload schemas, error codes, events, data invariants. |
 
 For the spec template body, frontmatter schema (`task`, `status`, `current_group`, `total_groups`, `created`, `updated`), and authoring rules, see [`core/spec-generation/SKILL.md`](../skills/core/spec-generation/SKILL.md).
+
+**Constitution.** Projects with `docs/constitution.md` at the repo root emit a `project_constitution` field in session context. Reviewer grades every diff against the listed invariants; critic uses them as the Scope Hazards reference frame during `/define`. See [`skills/core/constitution/SKILL.md`](../skills/core/constitution/SKILL.md).
 
 ## Group execution
 
 Groups bundle subtasks that can run in parallel within a group:
 
 - **Group 0** is spec approval itself (recorded in `group-log.md`).
-- **Group N** tasks run in parallel. The next group starts only after all Group N tasks complete AND the user approves Group N.
+- **Group N** tasks run in parallel. Every task carries a `[P]` marker declaring it parallel-safe with siblings — reviewer audits the marker against the task's `Files:` list, and overlapping writes with `[P]` markers is a Critical finding.
+- The next group starts only after all Group N tasks complete AND the user approves Group N.
 - Lead coordinates group execution when using `/orchestrate`.
 - Each task has a "Done when" criterion verified before the group completes.
 

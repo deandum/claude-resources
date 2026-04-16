@@ -62,7 +62,11 @@ Create an explicit assumptions list:
 
 Present to user. Wrong assumptions caught here cost 5 minutes. Wrong assumptions caught in production cost days.
 
+Every Gap that cannot be resolved from task text + codebase MUST be converted into a Clarifying Question under `## Clarifying Questions` in `critique.md`. Each question has a suggested default (the answer you'd pick if the user says nothing) and a `Blocker: yes/no` flag. Mark `Blocker: yes` when proceeding without an answer would make the spec silently wrong. Lead pauses at Step 2b until every `Blocker: yes` question is resolved.
+
 ### 3. Identify problems
+
+Before listing problems, read `project_constitution` from session-start context. The field is a semicolon-joined list of `id(severity)` pairs. If non-empty, read `docs/constitution.md` for the full invariant text. Use invariants as the reference frame for Scope Hazards — if the task would require breaking an invariant, that is not a style debate; it is a blocker.
 
 Be direct about:
 - **Vague requirements** — "Make it faster" is not a task. "Reduce p99 latency from 200ms to 50ms" is.
@@ -71,6 +75,7 @@ Be direct about:
 - **Scope creep** — "Add authentication" is 15 tasks pretending to be one. Break it apart.
 - **Wrong approach** — if proposed solution is bad, say so. Explain why. Propose the right one.
 - **Already exists** — cite scout's `docs/specs/<slug>/discovery.md` if the feature turns up there.
+- **Constitutional collision** — if the request would violate a `critical` invariant, surface it as a blocking gap. If it would violate an `important` invariant, fold into Scope Hazards with the invariant id cited.
 
 ### 4. Produce structured task definition
 

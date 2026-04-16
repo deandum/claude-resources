@@ -13,6 +13,20 @@ What is missing from the task as stated? Unstated assumptions, missing acceptanc
 
 - [Gap] — the task assumes X but does not specify Y.
 
+## Clarifying Questions
+
+Every gap that cannot be resolved from task text + codebase becomes a question the user must answer before spec synthesis. Each question carries a suggested default so the flow stays fast when the default is acceptable. `Blocker: yes` means proceeding without an answer would make the spec silently wrong — lead pauses at Step 2b until these are resolved.
+
+1. **Q:** [the question]
+   **Suggested default:** [the answer to use if the user skips]
+   **Blocker:** yes
+
+2. **Q:** [the question]
+   **Suggested default:** [the answer to use if the user skips]
+   **Blocker:** no
+
+<!-- If there are no clarifying questions, state "_None — every gap resolvable from task + codebase._" and omit the numbered list. -->
+
 ## XY Problems
 
 Cases where the request asks for X but the underlying need is Y. Call out the X→Y mismatch and the real problem.

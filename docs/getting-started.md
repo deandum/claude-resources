@@ -76,6 +76,12 @@ Your `CLAUDE.md` should include:
 - Boundaries: always do, ask first, never do
 - Project-specific conventions
 
+### Optional: project constitution
+
+For projects that benefit from machine-enforced invariants (security-sensitive code, regulated domains, long-lived systems with many contributors), copy `EXAMPLE_CONSTITUTION.md` to `docs/constitution.md` and edit the invariant list. The session-start hook reads it automatically; reviewer checks every diff against the listed invariants and critic uses them as the Scope Hazards reference frame during `/define`.
+
+Keep the list small (3–10 invariants) and use `critical` severity sparingly — `critical` blocks advancement, `important` only flags. See [`skills/core/constitution/SKILL.md`](../skills/core/constitution/SKILL.md) for authoring guidance.
+
 ## Your first workflow
 
 The framework follows a spec-driven workflow. Here's a concrete walkthrough from idea to shipped code. For the full phase-by-phase reference, see [workflow.md](workflow.md).

@@ -9,6 +9,10 @@ Most AI coding assistants generate code without engineering discipline. This fra
 - **Structured workflows** that enforce spec-first, test-proven, review-gated development
 - **Specialist agents** that collaborate like a real engineering team — architect, builder, tester, reviewer
 - **Skills** that encode battle-tested patterns, not just documentation
+- **Project constitutions** — enforce non-negotiable invariants across every spec and every review
+- **Clarification round-trips** — user answers blocker questions before the spec is synthesized, not after
+- **Explicit contracts** — optional `contracts.md` for API/data specs pins endpoints, schemas, and error codes
+- **Parallelization markers** — `[P]` on every subtask makes parallel-safety auditable
 - **Operational learning** that captures project-specific knowledge across sessions
 - **Token-efficient output** that reduces cost at scale without sacrificing reasoning or spec quality
 

@@ -27,15 +27,16 @@ Code without a spec is guessing. The spec surfaces misunderstandings before code
 ## Core Process
 
 1. **Create spec directory** — Derive a kebab-case slug from the task. Create `docs/specs/<slug>/` by copying every file from `references/` into it.
-2. **Clarify + ground** — Spawn `critic` and `scout` in parallel. Critic writes `critique.md` (gaps, XY problems, scope hazards). Scout writes `discovery.md` (existing code, patterns, gotchas).
+2. **Clarify + ground** — Spawn `critic` and `scout` in parallel. Critic writes `critique.md` (gaps, XY problems, scope hazards, clarifying questions). Scout writes `discovery.md` (existing code, patterns, gotchas).
 3. **Pre-spec findings review** — Present the raw findings to the user as a `needs-input` report (one-line bullets per finding). User approves, corrects specific bullets, or stops. **Do not synthesize the spec until findings are approved.** This is the first cognitive-load checkpoint and costs the user seconds, not minutes.
-4. **Scope** — Define what's in and explicitly what's out
-5. **Surface assumptions** — List every assumption for user validation; scout's findings upgrade assumptions to "validated against codebase"
-6. **Plan groups** — Break into atomic subtasks with dependencies. Tasks within a group run in parallel; groups run sequentially.
-7. **Define boundaries** — Always do / Ask first / Never do
-8. **Set success criteria** — Testable, measurable, verifiable evidence
-9. **Populate spec.md** — Fold approved findings into the template. Frontmatter starts at `status: draft`, `current_group: 0`.
-10. **Get approval** — Present `spec.md` to user. Do NOT proceed without sign-off. On approval, update frontmatter `status: approved` and record the decision in `group-log.md` Group 0.
+4. **Clarification round-trip** — If `critique.md` has any `Blocker: yes` clarifying questions, pause for answers before synthesis. Each question has a suggested default the user can accept with `default: N` or `default: all`. Record resolutions under a `## Resolutions` section in `critique.md` and fold the answers into `spec.md` `Assumptions` with the tag `(from clarification)`. Skip this step if there are no blocker questions.
+5. **Scope** — Define what's in and explicitly what's out
+6. **Surface assumptions** — List every assumption for user validation; scout's findings upgrade assumptions to "validated against codebase"
+7. **Plan groups** — Break into atomic subtasks with dependencies. Tasks within a group run in parallel; groups run sequentially.
+8. **Define boundaries** — Always do / Ask first / Never do
+9. **Set success criteria** — Testable, measurable, verifiable evidence
+10. **Populate spec.md** — Fold approved findings into the template. Frontmatter starts at `status: draft`, `current_group: 0`.
+11. **Get approval** — Present `spec.md` to user. Do NOT proceed without sign-off. On approval, update frontmatter `status: approved` and record the decision in `group-log.md` Group 0.
 
 ## Spec Template
 
@@ -73,13 +74,15 @@ Every spec MUST use this exact structure:
 
 ## Subtasks
 
+<!-- [P] = parallel-safe with siblings. Every task carries [P]; if a task is not parallel-safe, move it to its own group. -->
+
 ### Group 1: [description] (parallel)
-- [ ] **[agent]** — [one-sentence task description]
+- [ ] **[P] [agent]** — [one-sentence task description]
   - Files: [specific files]
   - Done when: [acceptance criterion]
 
 ### Group 2: [description] (depends on Group 1)
-- [ ] **[agent]** — [one-sentence task description]
+- [ ] **[P] [agent]** — [one-sentence task description]
   - Files: [specific files]
   - Done when: [acceptance criterion]
 
@@ -118,21 +121,38 @@ Every spec MUST use this exact structure:
 - **Assumptions**: If you're assuming something, say it. Better to be wrong early than wrong in production.
 - **Scope**: "Out of Scope" prevents scope creep. Be explicit.
 - **Files table**: Exact paths. Agents execute literally — ambiguity becomes errors.
-- **Subtasks**: One agent per task. Each task completable in isolation. Each has acceptance criterion.
+- **Subtasks**: One agent per task. Each task completable in isolation. Each has acceptance criterion. Every task carries a `[P]` marker declaring it parallel-safe with its siblings — reviewer can audit that claim against the file list.
 - **Commands**: Exact commands with flags. Not "run tests" — give the full command with every flag spelled out.
 - **Boundaries**: Three tiers prevent ambiguity. "Ask first" is for judgment calls.
 - **Success Criteria**: Every criterion must be verifiable with a command or observable evidence. "Works correctly" is NOT a criterion. "GET /api/v1/orders returns 200 with order list" IS.
 
+### Parallelization Markers
+
+The `[P]` prefix on every subtask declares "this task is safe to run simultaneously with every other task in this group." It encodes what the framework already does — groups are the unit of parallelism, tasks within a group are fanned out — but makes the safety claim auditable.
+
+- If a task cannot be marked `[P]` (it reads files another task in the group writes, or it mutates shared state), split it into its own group.
+- The marker appears before the agent name: `**[P] builder**`, `**[P] tester**`, etc.
+- Reviewer checks markers during mini-review by cross-referencing the `Files:` line on each task — overlapping writes in the same group with `[P]` markers is a Critical finding.
+
 ## Spec Directory Layout
 
-Specs live under `docs/specs/<slug>/` as a directory of four artifacts. Lead creates the directory by copying every file from this skill's `references/` subdirectory into place at the start of Step 7.
+Specs live under `docs/specs/<slug>/` as a directory of four required artifacts plus one optional artifact. Lead creates the directory at Step 1 by copying the four required templates from this skill's `references/` subdirectory. The fifth template (`contracts.md`) is copied conditionally — see the trigger rule below.
 
 | File | Owner | Lifecycle |
 |------|-------|-----------|
-| `spec.md` | lead | The contract. Created in Step 7, approved in Step 8, frontmatter evolves across groups. |
-| `discovery.md` | scout | Written in Step 1 (parallel with critic). Frozen after Group 0 approval. |
-| `critique.md` | critic | Written in Step 1 (parallel with scout). Frozen after Group 0 approval. |
+| `spec.md` | lead | The contract. Created in Step 10, approved in Step 11, frontmatter evolves across groups. |
+| `discovery.md` | scout | Written in Step 2 (parallel with critic). Frozen after Group 0 approval. |
+| `critique.md` | critic | Written in Step 2 (parallel with scout). Clarifying Questions resolved in Step 4. Frozen after Group 0 approval. |
 | `group-log.md` | lead | Append-only. Group 0 records spec approval; Group N records group completion + user sign-off. |
+| `contracts.md` | architect | Optional. Copied by lead at Step 1 when the task is API/data-heavy (mentions endpoints, schemas, events, payloads, DB tables, message formats). Populated by architect after spec synthesis. |
+
+### Contracts trigger
+
+At Step 1, lead scans the task description for any of these markers: `REST`, `gRPC`, `endpoint`, `handler`, `schema`, `webhook`, `event`, `message`, `payload`, `DB table`, `migration`, `API`. If any are present, lead copies `contracts.md` into the spec directory alongside the four required artifacts. If none are present, lead omits it — the spec directory has four artifacts.
+
+When unsure, lead asks during Step 4 (Clarification round-trip) as an additional blocker question: "This spec may involve an HTTP/data contract. Copy contracts.md? (yes/no)".
+
+After `spec.md` is approved, if `contracts.md` exists and is still the raw template, lead spawns `architect` to populate it from `spec.md` + `discovery.md`. Reviewer validates implementation against `contracts.md` during mini-review — mismatches are Critical findings.
 
 ### Frontmatter on `spec.md`
 
@@ -163,7 +183,7 @@ A session that ends mid-execution leaves the spec directory in a recoverable sta
 
 ### Template files and the core-skills convention
 
-Core skills normally ship without supporting files (see [CLAUDE.md](../../../CLAUDE.md) → Naming). This skill is an exception: the four templates under `references/` are load-bearing content that exceeds the ~100-line ceiling for inline embedding, and every `/define` invocation depends on them. The exception is justified because the alternative — embedding the templates in `SKILL.md` itself — would push this file past the anatomy's concision rule.
+Core skills normally ship without supporting files (see [CLAUDE.md](../../../CLAUDE.md) → Naming). This skill is an exception: the five templates under `references/` (`spec.md`, `discovery.md`, `critique.md`, `group-log.md`, and the conditional `contracts.md`) are load-bearing content that exceeds the ~100-line ceiling for inline embedding, and every `/define` invocation depends on them. The exception is justified because the alternative — embedding the templates in `SKILL.md` itself — would push this file past the anatomy's concision rule.
 
 Pair with: `core/discovery`, `core/skill-discovery`.
 
@@ -187,9 +207,12 @@ Pair with: `core/discovery`, `core/skill-discovery`.
 
 ## Verification
 
-- [ ] `docs/specs/<slug>/` exists with all four artifacts: `spec.md`, `discovery.md`, `critique.md`, `group-log.md`
+- [ ] `docs/specs/<slug>/` exists with the four required artifacts: `spec.md`, `discovery.md`, `critique.md`, `group-log.md`
+- [ ] If the task is API/data-heavy, `contracts.md` is also present and populated by architect (endpoints, schemas, error codes)
 - [ ] `spec.md` frontmatter has all six fields (`task`, `status`, `current_group`, `total_groups`, `created`, `updated`)
 - [ ] `spec.md` covers all template sections (no skipped sections)
+- [ ] Every subtask carries the `[P]` parallelization marker
+- [ ] If `critique.md` had `Blocker: yes` questions, `## Resolutions` section exists and answers are folded into `spec.md` Assumptions with `(from clarification)` tag
 - [ ] Assumptions explicitly stated; scout's Handoff items are marked "validated against codebase"
 - [ ] Success criteria are testable (each can be verified with a command or observation)
 - [ ] Boundaries have items in all three tiers

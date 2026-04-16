@@ -69,6 +69,30 @@ Language identified by the session-start hook (`detected_languages` in session J
 | **Security** | Input validated? SQL parameterized? No secrets in code/logs? Auth checks? |
 | **Performance** | N+1 queries? Unbounded operations? Timeouts on external calls? |
 
+## Constitution Check
+
+After the five axes, check `project_constitution` from session context. The field is a semicolon-joined list of `id(severity)` pairs (e.g., `no-silent-failures(critical);public-function-tested(important)`).
+
+- If the field is empty, skip this pass.
+- If non-empty, read `docs/constitution.md` for the full invariant text (Rationale, Scope, Detection).
+- For every invariant whose Scope covers files in the diff, verify the diff does not violate it.
+- **Severity governs finding severity**: `critical` violations become Critical findings regardless of other axes. `important` violations become Important findings.
+- Cite the invariant `id` in the finding so the author can grep for the full rule. Example: `Critical: [internal/api/handlers/user.go:42] error swallowed with _ = err — violates no-silent-failures.`
+
+A constitution violation is not optional. Even if the code is otherwise correct, the invariant wins.
+
+## Contracts Check (when `contracts.md` exists)
+
+If the spec directory contains `docs/specs/<slug>/contracts.md`, verify the implementation matches the contract as a seventh pass:
+
+- **Endpoints.** Each row in the contracts Endpoints table must have a corresponding registered route in the diff. Missing route, wrong HTTP method, or wrong path → Critical finding.
+- **Request schemas.** Handler must validate the fields the schema declares as `required` and reject the types the schema forbids. Missing validation → Critical finding.
+- **Response schemas.** Success and error response shapes must match. Extra or missing fields → Critical finding.
+- **Error codes.** Each error code in the contracts table must map to the declared HTTP status. A 400 where the contract specifies 409 → Critical finding.
+- **Data invariants.** If the contracts declare data invariants (e.g., "email stored lowercase"), verify the implementation preserves them. Violation → Critical finding.
+
+Cite the contracts.md section in the finding: `Critical: [internal/api/handlers/user.go:87] POST /users returns 200 on conflict; contracts.md Error Codes requires 409.`
+
 ## Severity Labels
 
 | Prefix | Meaning | Author Action |
@@ -110,12 +134,13 @@ The review itself goes in **Evidence** using this structure:
 
 **Verdict**: [APPROVE / REQUEST CHANGES / COMMENT]
 **Change size**: [X lines — assessment]
+**Constitution**: [pass | N violations — listed below] (omit line if no constitution loaded)
 
 ### Critical
-- [file:line] Description. Fix: [specific fix]
+- [file:line] Description. Fix: [specific fix]. (if constitutional, cite the invariant id)
 
 ### Important
-- [file:line] Description. Fix: [specific fix]
+- [file:line] Description. Fix: [specific fix]. (if constitutional, cite the invariant id)
 
 ### Suggestions
 - [file:line] Description
