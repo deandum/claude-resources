@@ -56,9 +56,29 @@ Subagents never spawn subagents. You never write application code.
 
 ## Phase 1 — Analysis
 
-**Step 1.** Derive a kebab-case slug from the task. Create `docs/specs/<slug>/` by copying the four required templates from `skills/core/spec-generation/references/` (`spec.md`, `discovery.md`, `critique.md`, `group-log.md`). Copy `contracts.md` only if the task text contains any of the API/data markers defined in `core/spec-generation` Contracts trigger.
+**Step 1a. Derive slug.** Lowercase the task's salient noun phrase (strip filler verbs like "add/fix/implement/update", articles, and punctuation), join tokens with `-`, truncate to ~6 tokens / 60 chars. If the resulting slug already exists under `docs/specs/`, append `-2`, `-3`, ... until unique. Examples: "Add OAuth callback handler" → `oauth-callback-handler`; "Fix the flaky user service test" → `flaky-user-service-test`.
 
-**Step 2.** Spawn `critic` and `scout` in a single assistant turn (two `Agent` tool calls in the same message; the framework runs them in parallel). Each subagent gets the full task text. If session-start context has `project_constitution` non-empty, quote the invariant list verbatim in the critic prompt under a header `Project invariants:` — critic surfaces any spec direction that would violate a `critical` invariant as `Blocker: yes`, regardless of which agent is nominally responsible for enforcement. Wait for both to return.
+**Step 1b. Create spec directory.** Copy the four required templates from `skills/core/spec-generation/references/` into `docs/specs/<slug>/`: `spec.md`, `discovery.md`, `critique.md`, `group-log.md`. In each copied file, replace the literal `task: <slug>` frontmatter token with the concrete slug, and replace `created: <ISO-8601 date>` / `updated: <ISO-8601 date>` (where present) with today's ISO-8601 timestamp. Copy `contracts.md` only if the task text matches the Contracts trigger defined in `core/spec-generation`; apply the same substitution there too.
+
+**Step 1c. Preflight assertion.** Before spawning any subagent, run `ls docs/specs/<slug>/` to confirm the directory exists and contains at minimum `spec.md`, `discovery.md`, `critique.md`, `group-log.md`. If the check fails, STOP — do not proceed to Step 2. Re-run Step 1b. Skipping this check was the #1 historical failure of this skill: subagents defaulted to writing into `.claude/` because main Claude never created the target directory.
+
+**Step 2.** Spawn `critic` and `scout` in a single assistant turn (two `Agent` tool calls in the same message; the framework runs them in parallel). If session-start context has `project_constitution` non-empty, quote the invariant list verbatim in the critic prompt under a header `Project invariants:` — critic surfaces any spec direction that would violate a `critical` invariant as `Blocker: yes`, regardless of which agent is nominally responsible for enforcement. Wait for both to return.
+
+Each spawn prompt MUST use this exact shape — critic and scout have no other channel to receive the slug:
+
+```
+Task: <full task text as the user wrote it>
+Slug: <concrete slug from Step 1a>
+Write to: docs/specs/<concrete-slug>/<critique.md|discovery.md>
+
+Project invariants: <verbatim list, or "none">   # critic only; omit for scout
+
+Report using the Agent Reporting schema (Status, Files touched, Evidence,
+Follow-ups, Blockers). Your `Files touched` row must match the `Write to:`
+path exactly — anything else is a contract violation.
+```
+
+Substitute `<concrete-slug>` with the real slug before spawning — never pass the literal string `<slug>` to a subagent. The `Write to:` line is the Phase 1 analog of Phase 3's `Files:` line (Step 9); treating them the same way eliminates the "where do I write?" ambiguity that caused subagents to default to `.claude/`.
 
 **Step 3. (Gate 1 — findings review.)** Present findings in a fixed two-section format so the user can see what each agent found without deduplication:
 
@@ -265,6 +285,9 @@ Reality: Spec revisions after approval require Gate 2 again. Otherwise the audit
 - `spec.md` frontmatter `status` doesn't match `group-log.md`'s last entry.
 - Spec revision without a `_revision_N_` note or re-approval.
 - Group-log task table shows `(direct)` in the Agent column — main Claude bypassed delegation.
+- Subagent report in Phase 1 shows `Files touched:` with a path outside `docs/specs/<slug>/` — e.g., `.claude/critique.md`, repo-root `discovery.md`.
+- Main Claude spawned critic or scout without running the Step 1c preflight `ls docs/specs/<slug>/`.
+- Spawn prompt to critic or scout contains the literal string `<slug>` — an unsubstituted placeholder means Step 1a wasn't executed.
 
 ## Verification Checklist
 

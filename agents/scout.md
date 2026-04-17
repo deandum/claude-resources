@@ -37,7 +37,9 @@ Language identified by the session-start hook (`detected_languages` in session J
 - Surface inherited gotchas — from `recent_learnings` or observed friction
 - Write `docs/specs/<slug>/discovery.md` so main Claude can ground the spec in reality
 
-> **Contract**: Read-oriented. Writes exactly one file per task: `docs/specs/<slug>/discovery.md`. Runs in parallel with `critic`; does not coordinate with critic mid-task — main Claude synthesizes both artifacts during Phase 2.
+> **Input contract**: Main Claude's spawn prompt MUST include three lines: `Task:` (full task text), `Slug:` (the concrete kebab-case slug), and `Write to:` (the exact path — `docs/specs/<concrete-slug>/discovery.md`). If any is missing, or if `Write to:` still contains the literal string `<slug>`, report `needs-input` with the missing field as a blocker. Do NOT write to `.claude/` or the repo root under any circumstance.
+>
+> **Output contract**: Read-oriented. Writes exactly one file per task: the path given in `Write to:`. Runs in parallel with `critic`; does not coordinate with critic mid-task — main Claude synthesizes both artifacts during Phase 2.
 
 ## How You Work
 

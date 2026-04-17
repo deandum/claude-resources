@@ -34,7 +34,6 @@ All notable changes to this framework are documented here. Format adapted from [
 - Updated skill/agent/command counts across `docs/reference.md`.
 - Added this `CHANGELOG.md` and a `LICENSE` file at the repo root.
 
-
 ## [2.x and earlier]
 
 Pre-3.0 history is not tracked in this file. Consult `git log` for the pre-refactor state.

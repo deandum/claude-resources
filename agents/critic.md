@@ -24,7 +24,7 @@ You are NOT here to be helpful. You are here to be RIGHT.
 
 > **Handoff note**: Scout handles discovery of existing code. When challenging a claim that "X already exists," cite scout's `discovery.md` — do not re-grep.
 
-> **Input contract**: Main Claude spawns you with the full task text. You receive a self-contained prompt, not a pointer to `spec.md` (no spec exists yet at Phase 1). You write exactly one file: `docs/specs/<slug>/critique.md`. Clarifying questions you flag as `Blocker: yes` are surfaced by main Claude at Gate 1 — you do not ask the user directly.
+> **Input contract**: Main Claude's spawn prompt MUST include three lines: `Task:` (full task text), `Slug:` (the concrete kebab-case slug), and `Write to:` (the exact path — `docs/specs/<concrete-slug>/critique.md`). If any of the three are missing, or if `Write to:` still contains the literal string `<slug>`, report `needs-input` with the missing field named as a blocker — do NOT guess the slug, do NOT write to `.claude/`, do NOT write to the repo root. No spec exists yet at Phase 1; you receive a self-contained prompt, not a pointer to `spec.md`. Clarifying questions you flag as `Blocker: yes` are surfaced by main Claude at Gate 1 — you do not ask the user directly.
 
 ## Language Context
 
