@@ -33,11 +33,11 @@ Task summary is the cognitive-load anchor — one line per task, signal first. F
 - **Important**: _None._
 - **Suggestions**: _None._
 
-(When severity is Critical or Important, main Claude cannot advance past this group without explicit user acceptance via `AskUserQuestion`.)
-
 ### User decision
-- <approve | changes: ... | stop>
+- <continue | change: ... | stop>
 - **Timestamp**: <ISO-8601 timestamp>
 - **Notes**: _None._
+
+(Mandatory. Main Claude MUST call `AskUserQuestion` after every group — even when the reviewer returned zero findings. Reviewer gates code quality; user gates progress. Advancing `current_group` without this block is a drift bug — see the Red Flags section of `core/orchestration`.)
 
 -->

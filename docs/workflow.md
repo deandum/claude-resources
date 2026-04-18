@@ -65,7 +65,7 @@ For the template, frontmatter schema, and spec-directory contract, see [`core/sp
 | **Output** | Implementation code following the spec's subtask for the current group |
 | **Key decisions** | Implementation details within the boundaries set by the spec |
 
-In-orchestration mode resumes Phase 3 and spawns one group's tasks at a time with a per-group gate (`approve` / `changes: <what>` / `stop`) between every group. Ad-hoc mode skips gates.
+In-orchestration mode resumes Phase 3 and spawns one group's tasks at a time with a per-group gate (`continue` / `change: <what>` / `stop`) between every group — the gate fires unconditionally, even when the reviewer returns zero findings. Ad-hoc mode skips gates.
 
 ### Test (`/test`)
 
@@ -135,7 +135,7 @@ Groups bundle subtasks that can run in parallel within a group:
 - Main Claude coordinates group execution when running `/orchestrate` or `/build` in in-orchestration mode.
 - Each task has a "Done when" criterion verified before the group completes.
 
-After every group, main Claude spawns `reviewer` in mini-review mode (scoped to the group's changed files), then pauses for explicit sign-off (`approve` / `changes: <what>` / `stop`). Critical or Important review findings force `needs-input` — no silent advancement past quality gates.
+After every group, main Claude spawns `reviewer` in mini-review mode (scoped to the group's changed files), then pauses for explicit sign-off (`continue` / `change: <what>` / `stop`). The gate is unconditional — a clean `LGTM` review does not auto-advance. Reviewer gates code quality; user gates progress. Critical or Important review findings additionally force `needs-input`.
 
 For the per-group sign-off shape, mini-review scoping, and resumption protocol, see [`skills/core/orchestration/SKILL.md`](../skills/core/orchestration/SKILL.md) Phase 3 (Steps 8–13).
 
@@ -180,7 +180,7 @@ A concrete flow, start to finish:
 
 10. **Main Claude spawns `reviewer` scoped to the group.** Reviewer walks the explicit file list (no `git diff` in mini-review mode). Returns findings labeled by severity.
 
-11. **Per-group gate.** Main Claude appends a "Group 1" section to `group-log.md` with the task summary table, mini-review findings, and timestamp, then asks `AskUserQuestion` with options `approve` / `changes: <what>` / `stop`. Critical/Important findings surfaced in the question body.
+11. **Per-group gate.** Main Claude appends a "Group 1" section to `group-log.md` with the task summary table, mini-review findings, and timestamp, then asks `AskUserQuestion` with options `continue` / `change: <what>` / `stop`. Critical/Important findings surfaced in the question body. This gate fires even when the reviewer returned zero findings — the user decides whether to proceed, redirect, or halt regardless of verdict.
 
 12. **A new learning surfaces.** During the work, builder discovered the project uses a non-obvious repository pattern. It calls `learn.sh` to record the learning to a `/tmp` buffer.
 

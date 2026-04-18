@@ -167,12 +167,23 @@ Reviewer runs the verify commands directly and captures exit codes. A failing bu
 - Mini-review findings (Critical / Important counts + citations)
 - ISO-8601 timestamp
 
-**Step 13. (Per-group gate.)** `AskUserQuestion`:
+**Step 13. (Per-group gate — MANDATORY, UNCONDITIONAL.)** Before spawning any subagent for Group N+1, you MUST call `AskUserQuestion`. This gate fires for **every** group regardless of reviewer verdict — `LGTM` / no findings does NOT skip the gate. Reviewer approval gates severity; the user gates progress. They are not the same thing.
 
-- Question: `"Approve Group N and proceed to Group N+1?"` — include the Critical/Important counts in the question body
-- Options: `approve` / `changes: <what>` / `stop`
+Call `AskUserQuestion` with this exact shape:
 
-If Critical or Important findings exist, the question body highlights them. Do NOT auto-approve. On `approve`: record in `group-log.md`, advance `current_group`. On `changes`: re-run affected tasks, re-present. On `stop`: set `status: blocked`.
+- **Question**: `"Approve Group N (<short group title>) and proceed to Group N+1?"`
+- **Question body** (header shown to the user): include the mini-review summary — `"Reviewer verdict: <APPROVE|REQUEST CHANGES>. Critical: <count>. Important: <count>. Files changed: <N>."` If Critical/Important > 0, list each finding verbatim.
+- **Options** (exactly these three):
+  - `continue` — approve this group, advance to Group N+1
+  - `change: <what>` — describe the revision needed (re-run task, adjust spec, fix a finding)
+  - `stop` — halt execution, set `status: blocked`
+
+Handling:
+- On `continue`: append a `### User decision` block to Group N's section in `group-log.md` (verbatim reply + ISO timestamp), then update `spec.md` frontmatter `current_group: N+1`, then proceed to Step 8 for Group N+1.
+- On `change: <what>`: treat as a `needs-input` resolution. Apply the revision (re-spawn task, edit spec via the revision procedure in Step 10, or re-run reviewer). Re-present the gate when the revision lands. Do NOT advance `current_group`.
+- On `stop`: set `status: blocked`, record the reason in `group-log.md`, halt.
+
+You have NOT completed the group until the `### User decision` block is written to `group-log.md`. If you catch yourself about to call `Agent` (to spawn Group N+1's builder/tester) without having run `AskUserQuestion` for Group N, STOP — that is the exact bug this step exists to prevent.
 
 Repeat Steps 8–13 for every group.
 
@@ -272,6 +283,10 @@ Reality: Out-of-band writes skip Gate 2 and the mini-review. That is the bug cla
 
 Reality: Gates are the HITL surface. Collapsing them defeats the point. One group → one gate.
 
+> "Reviewer said LGTM / no Critical findings, so I can advance to Group N+1"
+
+Reality: The reviewer gates *code quality*; the user gates *progress*. Step 13 is unconditional — every group ends with `AskUserQuestion`, even on a clean review. The user may want to pause, redirect scope, or stop entirely regardless of what the reviewer found.
+
 > "The user already approved the design, I can just fix this small issue"
 
 Reality: Spec revisions after approval require Gate 2 again. Otherwise the audit trail lies.
@@ -280,6 +295,9 @@ Reality: Spec revisions after approval require Gate 2 again. Otherwise the audit
 
 - Main Claude wrote to a source file in Phase 1 or Phase 2.
 - Two "Group N" entries in `group-log.md` without a gate entry between them.
+- Group N has task + mini-review sections in `group-log.md` but no `### User decision` block, yet Group N+1 has already started. The gate was skipped.
+- Main Claude spawned Group N+1's builder/tester/shipper without calling `AskUserQuestion` first.
+- Reviewer returned `complete` with zero findings and main Claude advanced `current_group` without a gate — "LGTM means auto-advance" is the precise failure mode Step 13 forbids.
 - Mini-review logged as `"Critical: _None._"` but reviewer never ran build/test.
 - Subagent prompt is "read `docs/specs/<slug>/spec.md`" with nothing else.
 - `spec.md` frontmatter `status` doesn't match `group-log.md`'s last entry.
@@ -295,7 +313,8 @@ Reality: Spec revisions after approval require Gate 2 again. Otherwise the audit
 - [ ] `critic` + `scout` spawned in one message with two `Agent` calls.
 - [ ] Gate 1 used `AskUserQuestion` before `spec.md` existed.
 - [ ] Gate 2 used `AskUserQuestion` before any Phase 3 subagent ran.
-- [ ] Per-group gate used `AskUserQuestion` after every group.
+- [ ] Per-group gate used `AskUserQuestion` after every group — including groups where the reviewer returned zero findings.
+- [ ] Every Group N section in `group-log.md` has a `### User decision` block recorded before Group N+1 started.
 - [ ] No source code written during Phase 1 or Phase 2.
 - [ ] No group started before the previous gate approved.
 - [ ] Every Phase 3 subagent received a targeted, self-contained prompt.
